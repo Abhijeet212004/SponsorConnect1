@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SponsorConnect - Premium Sponsorship Platform</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        :root {
+            --black-primary: #0a0a0a;
+            --black-secondary: #111111;
+            --black-light: #1a1a1a;
+            --accent-gold: #FFD700;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --gradient-dark: linear-gradient(135deg, #000000, #1a1a1a);
+            --gradient-gold: linear-gradient(45deg, #FFD700, #FFA500);
+        }
+
+        body {
+            background: var(--black-primary);
+            color: var(--text-primary);
+        }
+
+        /* Premium Header Styles */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 2rem;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.3s;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            border: 1px solid transparent;
+        }
+
+        .nav-links a:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+            transform: translateY(-2px);
+        }
+
+        /* Premium Slideshow Styles */
+        .slideshow {
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            background: var(--black-primary);
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: all 1s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        .slide img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.5;
+            filter: brightness(0.7);
+        }
+
+        .slide-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .slide-content h1 {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+
+        .slide-content p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Premium Category Cards */
+        .categories {
+            padding: 8rem 2rem;
+            background: var(--black-secondary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .categories h2 {
+            text-align: center;
+            margin-bottom: 4rem;
+            font-size: 3rem;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .card {
+            background: var(--black-light);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            transition: all 0.5s;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-20px);
+            box-shadow: 0 30px 60px rgba(255, 215, 0, 0.1);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: 0.5s;
+            filter: brightness(0.8);
+        }
+
+        .card:hover img {
+            transform: scale(1.1);
+            filter: brightness(1);
+        }
+
+        .card-content {
+            padding: 2rem;
+        }
+
+        .card-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent-gold);
+        }
+
+        .card-content p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Premium About Section */
+        .about {
+            padding: 10rem 2rem;
+            background-attachment: fixed;
+            background-image: url('/api/placeholder/1920/1080');
+            background-size: cover;
+            position: relative;
+        }
+
+        .about::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            background: linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 100%);
+        }
+
+        .about-content {
+            position: relative;
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .about h2 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .about p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            color: var(--text-secondary);
+        }
+
+        /* Subtle Gradient Overlay */
+        .gradient-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top right, rgba(255, 215, 0, 0.05), transparent 60%);
+            pointer-events: none;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="gradient-overlay"></div>
+    <!-- Rest of the HTML structure remains the same as previous version -->
+    <header>
+        <a href="#" class="logo">SponsorConnect</a>
+        <nav class="nav-links">
+            <a href="#about">About Us</a>
+            <a href="#sponsors">Top Sponsors</a>
+            <a href="#signup">Sign Up</a>
+            <a href="#signin">Sign In</a>
+        </nav>
+    </header>
+
+    <section class="slideshow">
+        <div class="slide active">
+            <img src="/assets/corporate-workers-brainstorming-together.jpg" alt="Sponsor 1">
+            <div class="slide-content">
+                <h1>Elite Partnerships</h1>
+                <p>Connect with premium brands and industry leaders</p>
+            </div>
+        </div>
+        <div class="slide">
+            <img src="assets/four-young-colleagues-working-beanbag-chairs.jpg" alt="Sponsor 2">
+            <div class="slide-content">
+                <h1>Exclusive Network</h1>
+                <p>Join our curated community of exceptional talents</p>
+            </div>
+        </div>
+        <div class="slide">
+            <img src="assets/group-creative-people-analyzing-result-work.jpg" alt="Sponsor 3">
+            <div class="slide-content">
+                <h1>Premium Opportunities</h1>
+                <p>Discover high-value sponsorship collaborations</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="categories" id="sponsors">
+        <h2 data-aos="fade-up">Featured Categories</h2>
+        <div class="card-container">
+            <div class="card" data-aos="fade-up" data-aos-delay="100">
+                <img src="/api/placeholder/400/300" alt="College">
+                <div class="card-content">
+                    <h3>Educational Institutions</h3>
+                    <p>Partner with prestigious colleges and universities</p>
+                </div>
+            </div>
+            <div class="card" data-aos="fade-up" data-aos-delay="200">
+                <img src="/api/placeholder/400/300" alt="YouTubers">
+                <div class="card-content">
+                    <h3>Content Creators</h3>
+                    <p>Collaborate with influential digital personalities</p>
+                </div>
+            </div>
+            <div class="card" data-aos="fade-up" data-aos-delay="300">
+                <img src="/api/placeholder/400/300" alt="Athletes">
+                <div class="card-content">
+                    <h3>Elite Athletes</h3>
+                    <p>Support rising stars and professional teams</p>
+                </div>
+            </div>
+            <div class="card" data-aos="fade-up" data-aos-delay="400">
+                <img src="/api/placeholder/400/300" alt="Creators">
+                <div class="card-content">
+                    <h3>Creative Professionals</h3>
+                    <p>Connect with distinguished artists and innovators</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="about" id="about">
+        <div class="about-content" data-aos="fade-up">
+            <h2>The Gold Standard in Sponsorships</h2>
+            <p>SponsorConnect represents the pinnacle of sponsorship networking. We curate exceptional partnerships between elite brands and distinguished talents, ensuring premium value for all our members.</p>
+            <p>Join our exclusive community and experience sponsorship opportunities at the highest level.</p>
+        </div>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 1000,
+            once: true
+        });
+
+        // Slideshow functionality
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+
+        function nextSlide() {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }
+
+        setInterval(nextSlide, 5000);
+
+        // Parallax effect
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const about = document.querySelector('.about');
+            about.style.backgroundPositionY = scrolled * 0.5 + 'px';
+        });
+    </script>
+</body>
+</html>
