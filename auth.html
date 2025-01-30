@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SponsorConnect - Join Our Network</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        :root {
+            --black-primary: #0a0a0a;
+            --black-secondary: #111111;
+            --black-light: #1a1a1a;
+            --accent-gold: #FFD700;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --gradient-gold: linear-gradient(45deg, #FFD700, #FFA500);
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--black-primary);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--black-secondary);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .header {
+            text-align: center;
+            padding: 2.5rem 2rem;
+            background: rgba(255, 215, 0, 0.05);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .auth-section {
+            padding: 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+        }
+
+        .role-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .role-option {
+            padding: 1rem;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .role-option.selected {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: var(--gradient-gold);
+            color: var(--black-primary);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .divider span {
+            padding: 0 1rem;
+        }
+        .page-transition {
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .page-loaded {
+            opacity: 1;
+        }
+        .back-link {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.back-link:hover {
+    color: var(--accent-gold);
+}
+    </style>
+</head>
+<body>
+    <div class="container" data-aos="fade-up">
+        <div class="header">
+            <div class="header">
+                <a href="index.html" class="back-link">← Back to Home</a>
+                <h1>Welcome to SponsorConnect</h1>
+                <p>Join our exclusive network of premium partnerships</p>
+            </div>
+        </div>
+        
+        <div class="auth-section">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('signin')">Sign In</button>
+                <button class="tab" onclick="switchTab('signup')">Sign Up</button>
+            </div>
+
+            <form id="authForm">
+                <div id="signupFields" style="display: none;">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" required placeholder="Enter your full name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" required placeholder="Enter your email">
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" required placeholder="Enter your password">
+                </div>
+
+                <div class="role-selector">
+                    <div class="role-option" onclick="selectRole(this, 'sponsor')">
+                        I want to Sponsor
+                    </div>
+                    <div class="role-option" onclick="selectRole(this, 'sponsored')">
+                        I want to be Sponsored
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Sign In</button>
+
+                <div class="divider">
+                    <span>or continue with</span>
+                </div>
+
+                <button type="button" class="btn btn-outline">
+                    <img src="/api/placeholder/24/24" alt="Google" width="24" height="24">
+                    Google
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 1000,
+            once: true
+        });
+
+        function switchTab(tab) {
+            const tabs = document.querySelectorAll('.tab');
+            const signupFields = document.getElementById('signupFields');
+            const submitBtn = document.querySelector('.btn-primary');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            if (tab === 'signup') {
+                tabs[1].classList.add('active');
+                signupFields.style.display = 'block';
+                submitBtn.textContent = 'Create Account';
+            } else {
+                tabs[0].classList.add('active');
+                signupFields.style.display = 'none';
+                submitBtn.textContent = 'Sign In';
+            }
+        }
+
+        function selectRole(element, role) {
+            document.querySelectorAll('.role-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            element.classList.add('selected');
+        }
+
+        document.getElementById('authForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            // Add your authentication logic here
+            window.addEventListener('load', () => {
+        // Check if there's a hash in the URL
+        if (window.location.hash) {
+            // Remove the # symbol
+            const page = window.location.hash.slice(1);
+            // Switch to the appropriate tab
+            switchTab(page);
+        }
+    });
+
+    function switchTab(tab) {
+        const tabs = document.querySelectorAll('.tab');
+        const signupFields = document.getElementById('signupFields');
+        const submitBtn = document.querySelector('.btn-primary');
+        
+        tabs.forEach(t => t.classList.remove('active'));
+        if (tab === 'signup') {
+            tabs[1].classList.add('active');
+            signupFields.style.display = 'block';
+            submitBtn.textContent = 'Create Account';
+            // Update URL hash without triggering scroll
+            history.replaceState(null, null, '#signup');
+        } else {
+            tabs[0].classList.add('active');
+            signupFields.style.display = 'none';
+            submitBtn.textContent = 'Sign In';
+            // Update URL hash without triggering scroll
+            history.replaceState(null, null, '#signin');
+        }
+    }
+    // Add to both files' script sections
+document.addEventListener('DOMContentLoaded', () => {
+    document.body.classList.add('page-loaded');
+});
+
+        });
+    </script>
+</body>
+</html>

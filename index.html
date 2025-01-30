@@ -20,10 +20,8 @@
             --accent-gold: #FFD700;
             --text-primary: #ffffff;
             --text-secondary: #a0a0a0;
-            --gradient-dark: linear-gradient(135deg, #000000, #1a1a1a);
             --gradient-gold: linear-gradient(45deg, #FFD700, #FFA500);
         }
-
         body {
             background: var(--black-primary);
             color: var(--text-primary);
@@ -255,6 +253,14 @@
             pointer-events: none;
             z-index: 1;
         }
+        .page-transition {
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .page-loaded {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -265,14 +271,14 @@
         <nav class="nav-links">
             <a href="#about">About Us</a>
             <a href="#sponsors">Top Sponsors</a>
-            <a href="#signup">Sign Up</a>
-            <a href="#signin">Sign In</a>
+            <a href="auth.html#signup">Sign Up</a>
+            <a href="auth.html#signin">Sign In</a>
         </nav>
     </header>
 
     <section class="slideshow">
         <div class="slide active">
-            <img src="/assets/corporate-workers-brainstorming-together.jpg" alt="Sponsor 1">
+            <img src="assets/corporate-workers-brainstorming-together.jpg" alt="Sponsor 1">
             <div class="slide-content">
                 <h1>Elite Partnerships</h1>
                 <p>Connect with premium brands and industry leaders</p>
@@ -361,7 +367,11 @@
             const scrolled = window.pageYOffset;
             const about = document.querySelector('.about');
             about.style.backgroundPositionY = scrolled * 0.5 + 'px';
-        });
+
+
+        }
+        
+    );
     </script>
 </body>
 </html>
