@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication - SponsorConnect</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="auth-page">
+    <div class="gradient-overlay"></div>
+    
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1 class="auth-title"><%= mode === 'login' ? 'Welcome Back' : 'Join SponsorConnect' %></h1>
+            
+            <% if (messages && messages[0]) { %>
+                <div class="flash-message error">
+                    <%= messages[0] %>
+                </div>
+            <% } %>
+
+            <div class="tabs">
+                <a href="/auth/login" class="tab <%= mode === 'login' ? 'active' : '' %>">Login</a>
+                <a href="/auth/signup" class="tab <%= mode === 'signup' ? 'active' : '' %>">Sign Up</a>
+            </div>
+
+            <form action="/auth/<%= mode %>" method="POST" class="auth-form" id="authForm">
+                <% if (mode === 'signup') { %>
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" name="fullName" required minlength="2">
+                    </div>
+                <% } %>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required minlength="6">
+                </div>
+
+                <% if (mode === 'signup') { %>
+                    <div class="form-group">
+                        <label for="role">I want to</label>
+                        <select id="role" name="role" required onchange="toggleRoleFields(this.value)">
+                            <option value="">Select your role</option>
+                            <option value="sponsor">Give Sponsorship</option>
+                            <option value="sponsored">Get Sponsorship</option>
+                        </select>
+                    </div>
+
+                    <!-- Sponsor Fields -->
+                    <div id="sponsorFields" style="display: none;">
+                        <div class="form-group">
+                            <label for="companyName">Company Name</label>
+                            <input type="text" id="companyName" name="companyName">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="domain">Interested Domains</label>
+                            <select id="domain" name="domain" multiple>
+                                <option value="technology">Technology</option>
+                                <option value="sports">Sports</option>
+                                <option value="education">Education</option>
+                                <option value="entertainment">Entertainment</option>
+                                <option value="business">Business</option>
+                                <option value="arts">Arts & Culture</option>
+                                <option value="health">Health & Wellness</option>
+                                <option value="social">Social Impact</option>
+                            </select>
+                            <small class="field-hint">Hold Ctrl/Cmd to select multiple domains</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="budget">Sponsorship Budget</label>
+                            <input type="number" id="budget" name="budget" min="1" placeholder="Enter amount in USD">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="website">Company Website (Optional)</label>
+                            <input type="url" id="website" name="website" placeholder="https://...">
+                        </div>
+                    </div>
+
+                    <!-- Sponsored Fields -->
+                    <div id="sponsoredFields" style="display: none;">
+                        <div class="form-group">
+                            <label for="eventDomain">Event Domain</label>
+                            <select id="eventDomain" name="eventDomain">
+                                <option value="">Select domain</option>
+                                <option value="technology">Technology</option>
+                                <option value="sports">Sports</option>
+                                <option value="education">Education</option>
+                                <option value="entertainment">Entertainment</option>
+                                <option value="business">Business</option>
+                                <option value="arts">Arts & Culture</option>
+                                <option value="health">Health & Wellness</option>
+                                <option value="social">Social Impact</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="amountNeeded">Required Sponsorship Amount</label>
+                            <input type="number" id="amountNeeded" name="amountNeeded" min="1" placeholder="Enter amount in USD">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Event Description</label>
+                            <textarea id="description" name="description" rows="4" placeholder="Describe your event..." minlength="10"></textarea>
+                        </div>
+                    </div>
+                <% } %>
+
+                <button type="submit" class="btn btn-primary">
+                    <%= mode === 'login' ? 'Login' : 'Sign Up' %>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function validateForm(event) {
+            const form = event.target;
+            const email = form.querySelector('#email').value;
+            const password = form.querySelector('#password').value;
+
+            // Basic email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError('Please enter a valid email address');
+                event.preventDefault();
+                return false;
+            }
+
+            // Password validation
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters long');
+                event.preventDefault();
+                return false;
+            }
+
+            return true;
+        }
+
+        function showError(message) {
+            const flashContainer = document.querySelector('.flash-message');
+            if (flashContainer) {
+                flashContainer.textContent = message;
+                flashContainer.style.display = 'block';
+            } else {
+                const newFlashContainer = document.createElement('div');
+                newFlashContainer.className = 'flash-message error';
+                newFlashContainer.textContent = message;
+                document.querySelector('.auth-card').insertBefore(newFlashContainer, document.querySelector('.tabs'));
+            }
+        }
+
+        function toggleRoleFields(role) {
+            const sponsorFields = document.getElementById('sponsorFields');
+            const sponsoredFields = document.getElementById('sponsoredFields');
+            
+            // Hide both sections first
+            sponsorFields.style.display = 'none';
+            sponsoredFields.style.display = 'none';
+            
+            // Disable all fields in both sections
+            const allFields = document.querySelectorAll('#sponsorFields input, #sponsorFields select, #sponsoredFields input, #sponsoredFields select, #sponsoredFields textarea');
+            allFields.forEach(field => {
+                field.disabled = true;
+                field.required = false;
+            });
+            
+            if (role === 'sponsor') {
+                sponsorFields.style.display = 'block';
+                const fields = sponsorFields.querySelectorAll('input, select');
+                fields.forEach(field => {
+                    field.disabled = false;
+                    if (field.name !== 'website') { // Website is optional
+                        field.required = true;
+                    }
+                });
+            } else if (role === 'sponsored') {
+                sponsoredFields.style.display = 'block';
+                const fields = sponsoredFields.querySelectorAll('input, select, textarea');
+                fields.forEach(field => {
+                    field.disabled = false;
+                    field.required = true;
+                });
+            }
+        }
+
+        // Initialize the form
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('authForm');
+            form.addEventListener('submit', validateForm);
+
+            const roleSelect = document.getElementById('role');
+            if (roleSelect) {
+                toggleRoleFields(roleSelect.value);
+            }
+        });
+    </script>
+</body>
+</html>

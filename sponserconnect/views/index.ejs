@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SponsorConnect - Premium Sponsorship Platform</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="gradient-overlay"></div>
+    <header>
+        <a href="/" class="logo">SponsorConnect</a>
+        <nav class="nav-links">
+            <a href="#about">About Us</a>
+            <a href="#sponsors">Top Sponsors</a>
+            <a href="/auth/signup">Sign Up</a>
+            <a href="/auth/login">Sign In</a>
+        </nav>
+    </header>
+
+    <section class="slideshow">
+        <div class="slide active">
+            <img src="/images/corporate-workers-brainstorming-together.jpg" alt="Sponsor 1">
+            <div class="slide-content">
+                <h1>Elite Partnerships</h1>
+                <p>Connect with premium brands and industry leaders</p>
+            </div>
+        </div>
+        <div class="slide">
+            <img src="/images/four-young-colleagues-working-beanbag-chairs.jpg" alt="Sponsor 2">
+            <div class="slide-content">
+                <h1>Exclusive Network</h1>
+                <p>Join our curated community of exceptional talents</p>
+            </div>
+        </div>
+        <div class="slide">
+            <img src="/images/group-creative-people-analyzing-result-work.jpg" alt="Sponsor 3">
+            <div class="slide-content">
+                <h1>Premium Opportunities</h1>
+                <p>Discover high-value sponsorship collaborations</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="categories" id="sponsors">
+        <h2>Featured Categories</h2>
+        <div class="card-container">
+            <div class="card">
+                <img src="/images/free-time-students-bachelor-s-campus-life-rhythm-five-friendly-students-are-walking.jpg" alt="College">
+                <div class="card-content">
+                    <h3>Educational Institutions</h3>
+                    <p>Partner with prestigious colleges and universities</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="/images/front-view-man-recording-himself.jpg" alt="YouTubers">
+                <div class="card-content">
+                    <h3>Content Creators</h3>
+                    <p>Collaborate with influential digital personalities</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="/images/football-player-tackling-ball-green-grass.jpg" alt="Athletes">
+                <div class="card-content">
+                    <h3>Elite Athletes</h3>
+                    <p>Support rising stars and professional teams</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="/images/medium-shot-smiley-colleagues-working-office.jpg" alt="Creators">
+                <div class="card-content">
+                    <h3>Creative Professionals</h3>
+                    <p>Connect with distinguished artists and innovators</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="about" id="about">
+        <div class="about-content">
+            <h2>The Gold Standard in Sponsorships</h2>
+            <p>SponsorConnect represents the pinnacle of sponsorship networking. We curate exceptional partnerships between elite brands and distinguished talents, ensuring premium value for all our members.</p>
+            <p>Join our exclusive community and experience sponsorship opportunities at the highest level.</p>
+        </div>
+    </section>
+
+    <section class="animation-container">
+        <canvas id="particleCanvas"></canvas>
+        <div class="animation-content">
+            <h2>Ready to Connect?</h2>
+            <p>Join our platform today and discover premium sponsorship opportunities that align with your brand.</p>
+        </div>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 1000,
+            once: true
+        });
+
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+
+        function nextSlide() {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }
+
+        setInterval(nextSlide, 5000);
+    </script>
+</body>
+</html>

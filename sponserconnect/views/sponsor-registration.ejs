@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sponsor Registration - SponsorConnect</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="gradient-overlay"></div>
+    <header>
+        <a href="/" class="logo">SponsorConnect</a>
+        <nav class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/profile">Profile</a>
+            <a href="/auth/logout">Logout</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="auth-container">
+            <div class="auth-card">
+                <h1>Complete Your Sponsor Profile</h1>
+                
+                <% if (messages.error) { %>
+                    <div class="flash-message error">
+                        <%= messages.error %>
+                    </div>
+                <% } %>
+                <% if (messages.success) { %>
+                    <div class="flash-message success">
+                        <%= messages.success %>
+                    </div>
+                <% } %>
+
+                <form action="/dashboard/sponsor-registration" method="POST" class="auth-form">
+                    <div class="form-group">
+                        <label for="companyName">Company Name</label>
+                        <input type="text" id="companyName" name="companyName" required 
+                               value="<%= user.companyName || '' %>">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="domain">Interested Domains</label>
+                        <select id="domain" name="domain" multiple required>
+                            <% const domains = ['technology', 'sports', 'education', 'entertainment', 
+                                              'business', 'arts', 'health', 'social'] %>
+                            <% const userDomains = Array.isArray(user.domain) ? user.domain : [] %>
+                            <% domains.forEach(domain => { %>
+                                <option value="<%= domain %>" 
+                                        <%= userDomains.includes(domain) ? 'selected' : '' %>>
+                                    <%= domain.charAt(0).toUpperCase() + domain.slice(1) %>
+                                </option>
+                            <% }) %>
+                        </select>
+                        <small class="field-hint">Hold Ctrl/Cmd to select multiple domains</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="budget">Sponsorship Budget</label>
+                        <input type="number" id="budget" name="budget" required min="1" 
+                               value="<%= user.budget || '' %>"
+                               placeholder="Enter amount in USD">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="website">Company Website (Optional)</label>
+                        <input type="url" id="website" name="website" 
+                               value="<%= user.website || '' %>"
+                               placeholder="https://...">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save Profile</button>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html> 
