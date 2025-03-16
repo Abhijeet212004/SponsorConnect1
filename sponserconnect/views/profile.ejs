@@ -1,0 +1,2591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - SponsorConnect</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Add keyframe animations */
+        @keyframes slideInFromLeft {
+            0% { transform: translateX(-100px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideInFromRight {
+            0% { transform: translateX(100px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .profile-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .profile-sidebar {
+            background: linear-gradient(145deg, var(--black-secondary), var(--black-primary));
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+            animation: slideInFromLeft 0.8s ease-out;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .profile-sidebar:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 25px rgba(255, 215, 0, 0.15);
+        }
+
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            border: 3px solid var(--accent-gold);
+            padding: 3px;
+            background: linear-gradient(45deg, var(--accent-gold), #FFA500);
+            animation: pulse 2s infinite;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-avatar:hover .avatar-overlay {
+            opacity: 1;
+        }
+
+        .avatar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 50%;
+        }
+
+        .avatar-overlay i {
+            color: var(--accent-gold);
+            font-size: 1.5rem;
+        }
+
+        #photoInput {
+            display: none;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            text-align: center;
+            margin: 1rem 0;
+            font-size: 1.8rem;
+            background: linear-gradient(45deg, var(--accent-gold), #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .role-badge {
+            text-align: center;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 20px;
+            margin: 1rem 0;
+            font-weight: 500;
+            color: var(--accent-gold);
+            animation: fadeIn 1s ease-out;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+            animation: fadeIn 1.2s ease-out;
+        }
+
+        .stat-box {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 215, 0, 0.15);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .profile-info {
+            margin-top: 2rem;
+            animation: fadeIn 1.4s ease-out;
+        }
+
+        .profile-info p {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin: 1rem 0;
+            padding: 0.8rem;
+            background: rgba(255, 215, 0, 0.05);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .profile-info p:hover {
+            background: rgba(255, 215, 0, 0.1);
+            transform: translateX(5px);
+        }
+
+        .profile-info i {
+            color: var(--accent-gold);
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .profile-main {
+            background: linear-gradient(145deg, var(--black-secondary), var(--black-primary));
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            animation: slideInFromRight 0.8s ease-out;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .listings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+            animation: fadeIn 1.2s ease-out;
+        }
+
+        .listing-card {
+            background: linear-gradient(145deg, rgba(255, 215, 0, 0.05), rgba(255, 215, 0, 0.02));
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 1.4s ease-out;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .listing-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: var(--accent-gold);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.2);
+        }
+
+        .listing-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .listing-title {
+            font-size: 1.3rem;
+            color: var(--accent-gold);
+            margin-bottom: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .listing-card:hover .listing-title {
+            transform: translateY(-2px);
+        }
+
+        .listing-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0.5rem;
+        }
+
+        .action-btn:hover {
+            color: var(--accent-gold);
+            transform: translateY(-2px);
+        }
+
+        .listing-content {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            flex: 1;
+        }
+
+        .listing-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .listing-amount {
+            font-size: 1.3rem;
+            font-weight: bold;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: all 0.3s ease;
+        }
+
+        .listing-card:hover .listing-amount {
+            transform: scale(1.1);
+        }
+
+        .listing-status {
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--accent-gold);
+        }
+
+        .add-listing-btn {
+            background: linear-gradient(to right, #FFD700, #FFA500);
+            color: #000000 !important;
+            border: none;
+            padding: 0.8rem 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-shadow: none;
+            -webkit-text-fill-color: #000000;
+            animation: fadeIn 1s ease-out;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .add-listing-btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3);
+            background: linear-gradient(to right, #FFE44D, #FFB347);
+        }
+
+        .add-listing-btn i {
+            color: #000000;
+            font-size: 0.9rem;
+        }
+
+        .add-listing-btn span {
+            color: #000000;
+            font-weight: 600;
+        }
+
+        .edit-profile-btn {
+            width: 100%;
+            padding: 0.8rem;
+            margin-top: 1rem;
+            background: linear-gradient(to right, #FFD700, #FFA500);
+            color: #000000;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            animation: fadeIn 1.6s ease-out;
+        }
+
+        .edit-profile-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            background: linear-gradient(to right, #FFE44D, #FFB347);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            position: relative;
+            background: var(--black-secondary);
+            margin: 5% auto;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 20px;
+            border: 1px solid var(--accent-gold);
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            position: absolute;
+            right: 1.5rem;
+            top: 1rem;
+            font-size: 2rem;
+            color: var(--accent-gold);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close:hover {
+            transform: scale(1.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--accent-gold);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--black-primary);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 10px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.1);
+            outline: none;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 1rem;
+            background: var(--gradient-gold);
+            color: var(--black-primary);
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .notifications-panel {
+            position: fixed;
+            top: 80px;
+            right: -400px;
+            width: 380px;
+            height: calc(100vh - 80px);
+            background: var(--black-secondary);
+            border-left: 1px solid var(--accent-gold);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .notifications-panel.active {
+            right: 0;
+        }
+
+        .notifications-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--accent-gold);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notifications-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .notification-item {
+            background: rgba(255, 215, 0, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .notification-item:hover {
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .notification-item.unread {
+            border-left: 3px solid var(--accent-gold);
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .notification-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .notification-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            padding-left: 1rem;
+        }
+
+        .notifications-btn {
+            background: none;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            position: relative;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            margin: 0;
+        }
+
+        .notifications-btn:hover {
+            color: var(--accent-gold);
+            background: rgba(255, 215, 0, 0.1);
+            border-color: rgba(255, 215, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .notification-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--accent-gold);
+            color: var(--black-primary);
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 50%;
+            min-width: 18px;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Header Styles */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(18, 18, 18, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        header.scrolled {
+            background: rgba(18, 18, 18, 0.98);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            text-decoration: none;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: all 0.3s ease;
+            margin-right: 2rem;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-gold);
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .nav-links a.active {
+            color: var(--accent-gold);
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .nav-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Add scroll behavior */
+        .profile-container {
+            padding-top: 100px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .nav-links a {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Contact button styles */
+        .btn-contact {
+            background: var(--gradient-gold);
+            color: var(--black-primary);
+            border: none;
+            padding: 0.8rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            width: 100%;
+            display: block;
+        }
+
+        .btn-contact:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .btn-contact:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Update the connect modal styles */
+        #connectModal .modal-content {
+            max-width: 500px;
+        }
+
+        .email-preview {
+            background: rgba(255, 215, 0, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        .btn-primary i {
+            margin-right: 0.5rem;
+        }
+
+        .notification-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .notification-actions .btn {
+            flex: 1;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-actions a.btn {
+            padding: 0.8rem;
+            color: var(--black-primary);
+            font-weight: 600;
+        }
+
+        /* Add smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Responsive improvements */
+        @media (max-width: 768px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-sidebar {
+                position: relative;
+                top: 0;
+                margin-bottom: 2rem;
+            }
+
+            .listings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Add scroll to top button styles */
+        .scroll-top-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(to right, #FFD700, #FFA500);
+            border: none;
+            border-radius: 50%;
+            color: #000000;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+        }
+
+        .scroll-top-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Payment Details Section Styles */
+        .payment-details-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .payment-details-section h3 {
+            color: var(--accent-gold);
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .payment-details-section h3::before {
+            content: '\f09d';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+        }
+
+        .payment-details-section .form-group {
+            background: rgba(255, 215, 0, 0.05);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .payment-details-section .form-group:hover {
+            background: rgba(255, 215, 0, 0.1);
+            transform: translateX(5px);
+        }
+
+        .payment-details-section .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .payment-details-section .form-group input {
+            background: var(--black-primary);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            padding: 0.8rem;
+            border-radius: 8px;
+            width: 100%;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .payment-details-section .form-group input:focus {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.1);
+            outline: none;
+            transform: translateY(-2px);
+        }
+
+        .payment-details-section .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Add divider between bank details and UPI */
+        .payment-details-section .upi-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px dashed rgba(255, 215, 0, 0.2);
+        }
+
+        /* Add validation styles */
+        .payment-details-section .form-group input:invalid {
+            border-color: #ff4444;
+        }
+
+        .payment-details-section .form-group input:invalid:focus {
+            box-shadow: 0 0 10px rgba(255, 68, 68, 0.1);
+        }
+
+        /* Add helper text */
+        .field-hint {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            padding-left: 0.5rem;
+            border-left: 2px solid var(--accent-gold);
+        }
+
+        .profile-checklist {
+            margin: 1.5rem 0;
+            background: rgba(255, 215, 0, 0.05);
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+
+        .checklist-item i {
+            color: var(--accent-gold);
+        }
+
+        .status-icon.fa-check-circle {
+            color: #4CAF50;
+            margin-left: auto;
+        }
+
+        .status-icon.fa-times-circle {
+            color: #f44336;
+            margin-left: auto;
+        }
+
+        .payment-info {
+            background: rgba(255, 215, 0, 0.05);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .recipient-details {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .recipient-details h3 {
+            color: var(--accent-gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .recipient-details p {
+            margin: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Payment Modal Styles */
+        .payment-info {
+            background: rgba(255, 215, 0, 0.05);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .recipient-details {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .recipient-details h3 {
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .recipient-details p {
+            margin: 0.8rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.5rem;
+            background: rgba(255, 215, 0, 0.03);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .recipient-details p:hover {
+            background: rgba(255, 215, 0, 0.08);
+            transform: translateX(5px);
+        }
+
+        .recipient-details i {
+            color: var(--accent-gold);
+            width: 20px;
+            text-align: center;
+        }
+
+        #paymentForm .form-group {
+            margin-top: 1.5rem;
+        }
+
+        #paymentForm .btn-primary {
+            margin-top: 1.5rem;
+            background: linear-gradient(to right, #FFD700, #FFA500);
+            color: #000;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        #paymentForm .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .field-hint {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            padding-left: 0.5rem;
+            border-left: 2px solid var(--accent-gold);
+        }
+
+        /* Transaction History Styles */
+        .transaction-history {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 215, 0, 0.15);
+        }
+
+        .transactions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .transaction-card {
+            background: linear-gradient(145deg, rgba(255, 215, 0, 0.05), rgba(255, 215, 0, 0.02));
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            animation: fadeIn 1.4s ease-out;
+        }
+
+        .transaction-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-gold);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.2);
+        }
+
+        .transaction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .transaction-type {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .transaction-type.sent {
+            color: #ff4444;
+        }
+
+        .transaction-type.received {
+            color: #00C851;
+        }
+
+        .transaction-date {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .transaction-details {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .amount-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .amount-section .amount {
+            font-size: 1.3rem;
+            font-weight: bold;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .payment-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .payment-info p {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .payment-info i {
+            color: var(--accent-gold);
+            width: 20px;
+            text-align: center;
+        }
+
+        .status-section {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .status-badge {
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            text-transform: capitalize;
+        }
+
+        .status-badge.status-completed {
+            background: rgba(0, 200, 81, 0.1);
+            color: #00C851;
+        }
+
+        .status-badge.status-pending {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--accent-gold);
+        }
+
+        .status-badge.status-failed {
+            background: rgba(255, 68, 68, 0.1);
+            color: #ff4444;
+        }
+
+        .no-transactions {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            background: rgba(255, 215, 0, 0.05);
+            border-radius: 15px;
+            border: 1px dashed rgba(255, 215, 0, 0.2);
+        }
+
+        .no-transactions p:first-child {
+            font-size: 1.2rem;
+            color: var(--accent-gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .no-transactions p:last-child {
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .transactions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .counterparty-info {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            background: rgba(255, 215, 0, 0.03);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .counterparty-info:hover {
+            background: rgba(255, 215, 0, 0.08);
+            transform: translateX(5px);
+        }
+
+        .counterparty-info p {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .counterparty-info i {
+            color: var(--accent-gold);
+            width: 20px;
+            text-align: center;
+        }
+
+        .transaction-history {
+            background: var(--black-secondary);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .transaction-history h2 {
+            color: var(--accent-gold);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .transaction-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .transaction-card {
+            background: var(--black-primary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .transaction-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            border-color: var(--accent-gold);
+        }
+
+        .transaction-card.sent::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: #ff4444;
+        }
+
+        .transaction-card.received::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: #00C851;
+        }
+
+        .transaction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .transaction-type {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .transaction-type.sent {
+            color: #ff4444;
+        }
+
+        .transaction-type.received {
+            color: #00C851;
+        }
+
+        .transaction-date {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .transaction-amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 1rem 0;
+            color: var(--accent-gold);
+        }
+
+        .transaction-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .transaction-details > div {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .transaction-details i {
+            color: var(--accent-gold);
+            width: 20px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-badge.completed {
+            background: rgba(0, 200, 81, 0.1);
+            color: #00C851;
+        }
+
+        .transaction-id {
+            margin-top: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .no-transactions {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .no-transactions i {
+            font-size: 3rem;
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+        }
+
+        .no-transactions .subtitle {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .transaction-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .payment-info .btn-primary {
+            background: linear-gradient(45deg, var(--accent-gold), #FFA500);
+            color: var(--black-primary);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .payment-info .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .payment-info .btn-primary:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="gradient-overlay"></div>
+    <header>
+        <a href="/" class="logo">SponsorConnect</a>
+        <nav class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/profile" class="active">Profile</a>
+            <a href="/auth/logout">Logout</a>
+        </nav>
+        <div class="nav-right">
+            <button class="notifications-btn" onclick="toggleNotifications()">
+                <i class="fas fa-bell"></i>
+                <span class="notification-count" style="display: none;">0</span>
+            </button>
+        </div>
+    </header>
+
+    <div id="notificationsPanel" class="notifications-panel">
+        <div class="notifications-header">
+            <h3>Notifications</h3>
+            <button class="close-notifications" onclick="toggleNotifications()">×</button>
+        </div>
+        <div class="notifications-list">
+            <!-- Notifications will be loaded here -->
+        </div>
+        </div>
+
+    <main class="profile-container">
+        <% if (messages.success) { %>
+            <div class="flash-message success">
+                <%= messages.success %>
+            </div>
+        <% } %>
+        <% if (messages.error) { %>
+            <div class="flash-message error">
+                <%= messages.error %>
+            </div>
+        <% } %>
+
+        <div class="profile-grid">
+            <!-- Sidebar -->
+            <div class="profile-sidebar">
+                <div class="profile-avatar" onclick="document.getElementById('photoInput').click()">
+                    <img src="<%= user.photoUrl || '/images/default-avatar.png' %>" alt="Profile Photo">
+                    <div class="avatar-overlay">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <input type="file" id="photoInput" accept="image/*" onchange="handlePhotoUpload(event)">
+                </div>
+                <h2 class="profile-name"><%= user.fullName %></h2>
+                <p class="role-badge"><%= user.role === 'sponsor' ? 'Sponsor' : 'Looking for Sponsorship' %></p>
+                
+                <div class="profile-stats">
+                    <div class="stat-box">
+                        <div class="stat-value">$<%= user.role === 'sponsor' ? (totalSponsored || 0) : (totalReceived || 0) %></div>
+                        <div class="stat-label">Total <%= user.role === 'sponsor' ? 'Given' : 'Received' %></div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value"><%= sponsorships ? sponsorships.length : 0 %></div>
+                        <div class="stat-label">Transactions</div>
+                    </div>
+                    </div>
+
+                <div class="profile-info">
+                    <p><i class="fas fa-envelope"></i> <%= user.email %></p>
+                    <% if (user.role === 'sponsor') { %>
+                        <p><i class="fas fa-building"></i> <%= user.companyName || 'Not specified' %></p>
+                        <p><i class="fas fa-globe"></i> <%= user.website || 'Not specified' %></p>
+                        <p><i class="fas fa-wallet"></i> $<%= user.budget || 0 %></p>
+                    <% } else { %>
+                        <p><i class="fas fa-tag"></i> <%= user.eventDomain || 'Not specified' %></p>
+                        <p><i class="fas fa-money-bill-wave"></i> $<%= user.amountNeeded || 0 %></p>
+                    <% } %>
+                </div>
+
+                <button class="edit-profile-btn">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </button>
+            </div>
+
+            <!-- Main Content -->
+            <div class="profile-main">
+                <div class="section-title">
+                    My Listings
+                    <button type="button" class="add-listing-btn">
+                        <i class="fas fa-plus" style="color: #000000;"></i>
+                        <span style="color: #000000;">Add New Listing</span>
+                    </button>
+                </div>
+
+                <div class="listings-grid">
+                    <% if (listings && listings.length > 0) { %>
+                        <% listings.forEach(listing => { %>
+                            <div class="listing-card" data-id="<%= listing._id %>">
+                                <div class="listing-header">
+                                    <div>
+                                        <h3 class="listing-title"><%= listing.title %></h3>
+                                        <p class="listing-date">
+                                            <i class="far fa-calendar-alt"></i>
+                                            <%= new Date(listing.createdAt).toLocaleDateString() %>
+                                        </p>
+                                    </div>
+                                    <div class="listing-actions">
+                                        <button class="action-btn" onclick="editListing('<%= listing._id %>')">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="action-btn" onclick="deleteListing('<%= listing._id %>')">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="listing-content">
+                                    <p><%= listing.description %></p>
+                                    <div class="listing-details">
+                                        <span class="domain-tag">
+                                            <i class="fas fa-tag"></i> <%= listing.domain %>
+                                        </span>
+                                        <% if (listing.requirements) { %>
+                                            <p class="requirements">
+                                                <i class="fas fa-list-check"></i> <%= listing.requirements %>
+                                            </p>
+                                        <% } %>
+                                    </div>
+                                </div>
+
+                                <div class="listing-footer">
+                                    <div class="listing-amount">
+                                        $<%= listing.amount %>
+                                    </div>
+                                    <div class="listing-status <%= listing.status.toLowerCase() %>">
+                                        <%= listing.status %>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="no-listings">
+                            <p>No listings to display</p>
+                            <p>Create your first listing to get started!</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('editProfileModal')">&times;</span>
+            <h2>Edit Profile</h2>
+            <form action="/profile/update" method="POST">
+                        <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" name="fullName" value="<%= user.fullName %>" required>
+                        </div>
+                
+                <% if (user.role === 'sponsor') { %>
+                        <div class="form-group">
+                        <label for="companyName">Company Name</label>
+                        <input type="text" id="companyName" name="companyName" value="<%= user.companyName %>">
+                        </div>
+                        <div class="form-group">
+                        <label for="website">Website</label>
+                        <input type="url" id="website" name="website" value="<%= user.website %>">
+                        </div>
+                        <div class="form-group">
+                        <label for="budget">Budget</label>
+                        <input type="number" id="budget" name="budget" value="<%= user.budget %>">
+                        </div>
+                    <% } else { %>
+                        <div class="form-group">
+                        <label for="eventDomain">Domain</label>
+                        <input type="text" id="eventDomain" name="domain" value="<%= user.eventDomain %>">
+                        </div>
+                        <div class="form-group">
+                        <label for="amountNeeded">Amount Needed</label>
+                        <input type="number" id="amountNeeded" name="amountNeeded" value="<%= user.amountNeeded %>">
+                        </div>
+                        <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" rows="4"><%= user.description %></textarea>
+                        </div>
+                    <% } %>
+
+                <!-- Payment Details Section -->
+                <div class="payment-details-section">
+                    <h3><i class="fas fa-money-check-alt"></i> Payment Details</h3>
+                    
+                    <div class="form-group">
+                        <label for="paymentMethod"><i class="fas fa-wallet"></i> Preferred Payment Method</label>
+                        <select id="paymentMethod" name="paymentMethod" onchange="togglePaymentFields()">
+                            <option value="">Select Payment Method</option>
+                            <option value="bank" <%= user.bankDetails?.bankName ? 'selected' : '' %>>Bank Transfer</option>
+                            <option value="upi" <%= user.upiId ? 'selected' : '' %>>UPI</option>
+                        </select>
+                        <span class="field-hint">Choose your preferred payment method</span>
+                    </div>
+
+                    <!-- Bank Details -->
+                    <div id="bankDetailsSection" class="payment-method-section" style="display: none;">
+                        <div class="form-group">
+                            <label for="bankName"><i class="fas fa-university"></i> Bank Name</label>
+                            <input type="text" id="bankName" name="bankDetails[bankName]" 
+                                value="<%= user.bankDetails?.bankName || '' %>" 
+                                placeholder="Enter bank name">
+                            <span class="field-hint">Enter the full name of your bank</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="accountNumber"><i class="fas fa-hashtag"></i> Account Number</label>
+                            <input type="text" id="accountNumber" name="bankDetails[accountNumber]" 
+                                value="<%= user.bankDetails?.accountNumber || '' %>"
+                                placeholder="Enter account number"
+                                pattern="[0-9]{9,18}">
+                            <span class="field-hint">Enter your bank account number (9-18 digits)</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="ifscCode"><i class="fas fa-code"></i> IFSC Code</label>
+                            <input type="text" id="ifscCode" name="bankDetails[ifscCode]" 
+                                value="<%= user.bankDetails?.ifscCode || '' %>"
+                                placeholder="Enter IFSC code"
+                                pattern="^[A-Z]{4}0[A-Z0-9]{6}$">
+                            <span class="field-hint">Enter your bank's IFSC code (e.g., HDFC0123456)</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="accountHolderName"><i class="fas fa-user"></i> Account Holder Name</label>
+                            <input type="text" id="accountHolderName" name="bankDetails[accountHolderName]" 
+                                value="<%= user.bankDetails?.accountHolderName || '' %>"
+                                placeholder="Enter account holder name">
+                            <span class="field-hint">Enter the name as it appears on your bank account</span>
+                        </div>
+                    </div>
+
+                    <!-- UPI Details -->
+                    <div id="upiSection" class="payment-method-section" style="display: none;">
+                        <div class="form-group">
+                            <label for="upiId"><i class="fas fa-qrcode"></i> UPI ID</label>
+                            <input type="text" id="upiId" name="upiId" 
+                                value="<%= user.upiId || '' %>"
+                                placeholder="Enter UPI ID (e.g., username@upi)"
+                                pattern="^[\w\.\-]+@[\w\.\-]+$">
+                            <span class="field-hint">Enter your UPI ID in the format username@upi</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Listing Modal -->
+    <div id="listingModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('listingModal')">&times;</span>
+            <h2 id="modalTitle">Create New Listing</h2>
+            <form id="listingForm" onsubmit="handleListingSubmit(event)">
+                <input type="hidden" id="listingId" name="listingId">
+                <div class="form-group">
+                    <label for="title">Title*</label>
+                    <input type="text" id="title" name="title" required placeholder="Enter listing title">
+                                </div>
+                <div class="form-group">
+                    <label for="description">Description*</label>
+                    <textarea id="description" name="description" rows="3" required placeholder="Enter brief description"></textarea>
+                                </div>
+                <div class="form-group">
+                    <label for="domain">Domain*</label>
+                    <select id="domain" name="domain" required>
+                        <option value="">Select Domain</option>
+                        <option value="technology">Technology</option>
+                        <option value="education">Education</option>
+                        <option value="sports">Sports</option>
+                        <option value="arts">Arts & Culture</option>
+                        <option value="business">Business</option>
+                        <option value="healthcare">Healthcare</option>
+                        <option value="environment">Environment</option>
+                        <option value="other">Other</option>
+                    </select>
+                                    </div>
+                <div class="form-group">
+                    <label for="amount">Amount (USD)*</label>
+                    <input type="number" id="amount" name="amount" required min="1" placeholder="Enter amount in USD">
+                            </div>
+                <button type="submit" class="btn btn-primary" id="submitButton">Create Listing</button>
+            </form>
+                </div>
+        </div>
+
+    <!-- Connect Modal -->
+    <div id="connectModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('connectModal')">&times;</span>
+            <h2 id="connectModalTitle">Send Connection Request</h2>
+            <form id="connectForm" onsubmit="sendConnectionRequest(event)">
+                <input type="hidden" id="connectUserId" name="userId">
+                <input type="hidden" id="connectListingId" name="listingId">
+                <div class="form-group">
+                    <label for="connectMessage">Message*</label>
+                    <textarea id="connectMessage" name="message" rows="4" required 
+                        placeholder="Introduce yourself and explain why you'd like to connect..."></textarea>
+                </div>
+                <div class="email-preview" id="emailPreview">
+                    <!-- Email preview will be shown here -->
+                </div>
+                <button type="submit" class="btn btn-primary">Send Request</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Profile Completion Modal -->
+    <div id="incompleteProfileModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('incompleteProfileModal')">&times;</span>
+            <h2><i class="fas fa-exclamation-circle" style="color: #FFD700;"></i> Complete Your Profile</h2>
+            <p style="margin: 1rem 0;">Please complete your profile before connecting with sponsors. This helps ensure smooth payment processing.</p>
+            <div class="profile-checklist">
+                <div class="checklist-item">
+                    <i class="fas fa-user"></i>
+                    <span>Basic Information</span>
+                    <i class="fas fa-check-circle status-icon"></i>
+                </div>
+                <div class="checklist-item" id="paymentDetailsCheck">
+                    <i class="fas fa-money-check-alt"></i>
+                    <span>Payment Details</span>
+                    <i class="fas fa-times-circle status-icon"></i>
+                </div>
+            </div>
+            <button onclick="openModal('editProfileModal'); closeModal('incompleteProfileModal')" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Complete Profile
+            </button>
+        </div>
+    </div>
+
+    <!-- Add Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('paymentModal')">&times;</span>
+            <h2><i class="fas fa-money-bill-wave" style="color: #FFD700;"></i> Complete Payment</h2>
+            
+            <div class="payment-info">
+                <div class="recipient-details">
+                    <h3>Recipient Details</h3>
+                    <div id="recipientInfo"></div>
+                </div>
+                
+                <form id="paymentForm" onsubmit="handlePaymentSubmit(event)">
+                    <input type="hidden" id="recipientUserId" name="recipientId">
+                    <input type="hidden" id="notificationId" name="notificationId">
+                    
+                    <div class="form-group">
+                        <label for="paymentAmount">
+                            <i class="fas fa-rupee-sign"></i> Amount (INR)
+                        </label>
+                        <input type="number" 
+                               id="paymentAmount" 
+                               name="amount" 
+                               required 
+                               min="1" 
+                               step="1"
+                               placeholder="Enter amount">
+                        <span class="field-hint">Enter the amount you want to send</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check-circle"></i> Confirm Payment
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+            <!-- Transaction History Section -->
+            <section class="transaction-history">
+                <h2>Transaction History</h2>
+        <% if (user.transactions && user.transactions.length > 0) { %>
+            <div class="transaction-grid">
+                <% user.transactions.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(transaction => { %>
+                    <div class="transaction-card <%= transaction.type %>">
+                                <div class="transaction-header">
+                            <div class="transaction-type <%= transaction.type %>">
+                                <i class="fas fa-<%= transaction.type === 'sent' ? 'arrow-up' : 'arrow-down' %>"></i>
+                                <%= transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1) %>
+                            </div>
+                            <div class="transaction-date">
+                                <%= new Date(transaction.date).toLocaleDateString('en-US', { 
+                                    year: 'numeric', 
+                                    month: 'short', 
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                }) %>
+                            </div>
+                        </div>
+                        <div class="transaction-amount">
+                            <span class="currency">₹</span>
+                            <span class="amount"><%= transaction.amount.toLocaleString('en-IN') %></span>
+                                </div>
+                                <div class="transaction-details">
+                            <div class="transaction-listing">
+                                <i class="fas fa-file-alt"></i>
+                                <%= transaction.listingTitle || 'Sponsorship Payment' %>
+                                </div>
+                            <div class="transaction-counterparty">
+                                <i class="fas fa-user"></i>
+                                <%= transaction.type === 'sent' ? 'To' : 'From' %>: 
+                                <%= transaction.counterpartyName || 'User' %>
+                                    </div>
+                            <div class="transaction-method">
+                                <i class="fas fa-credit-card"></i>
+                                <%= transaction.paymentMethod ? transaction.paymentMethod.toUpperCase() : 'Online Payment' %>
+                            </div>
+                        </div>
+                        <div class="transaction-status">
+                            <span class="status-badge <%= transaction.status.toLowerCase() %>">
+                                <i class="fas fa-check-circle"></i>
+                                <%= transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1) %>
+                            </span>
+                            <div class="transaction-id">
+                                <small>TXN ID: <%= transaction.transactionId %></small>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+                    <% } else { %>
+            <div class="no-transactions">
+                <i class="fas fa-history"></i>
+                <p>No transactions yet</p>
+                <p class="subtitle">Your payment history will appear here</p>
+                </div>
+        <% } %>
+            </section>
+
+    <!-- Add this before closing body tag -->
+    <button id="scrollTopBtn" class="scroll-top-btn" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script>
+        // Add user object to JavaScript context
+        const user = <%- JSON.stringify(user) %>;
+        
+        // Initialize notifications array from server data
+        let notifications = <%- JSON.stringify(notifications || []) %>;
+        let unreadCount = notifications.filter(n => !n.read).length;
+
+        // Update notification count badge
+        function updateNotificationCount() {
+            const countElement = document.querySelector('.notification-count');
+            if (unreadCount > 0) {
+                countElement.style.display = 'block';
+                countElement.textContent = unreadCount;
+            } else {
+                countElement.style.display = 'none';
+            }
+        }
+
+        // Fetch notifications
+        async function fetchNotifications() {
+            try {
+                const response = await fetch('/notifications');
+                const data = await response.json();
+                
+                if (data.success) {
+                    notifications = data.notifications;
+                    unreadCount = notifications.filter(n => !n.read).length;
+                    updateNotificationCount();
+                    renderNotifications();
+                }
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+            }
+        }
+
+        // Render notifications in the panel
+        function renderNotifications() {
+            const container = document.querySelector('.notifications-list');
+            if (!notifications || notifications.length === 0) {
+                container.innerHTML = '<p class="no-notifications">No notifications</p>';
+                return;
+            }
+
+            container.innerHTML = notifications.map(notification => {
+                try {
+                    // Basic validation of notification object
+                    if (!notification || !notification._id) {
+                        console.error('Invalid notification data:', notification);
+                        return '';
+                    }
+
+                    // Handle different notification types
+                    const notificationType = notification.type || 'unknown';
+                    const isConnectionAccepted = notificationType === 'connection_accepted';
+                    const isConnectionRequest = notificationType === 'connection_request';
+
+                    // Get user details safely
+                    const fromUser = notification.from || {};
+                    const toUser = notification.to || {};
+                    const listingDetails = notification.listingId || {};
+
+                    // Determine if current user is sender or receiver
+                    const isCurrentUserSender = fromUser._id === user._id;
+                    
+                    // Get the other party's email safely
+                    const emailToUse = isCurrentUserSender ? (toUser.email || '') : (fromUser.email || '');
+                    
+                    // Show Gmail button for accepted connections
+                    const showGmailButton = isConnectionAccepted || (notification.status === 'accepted');
+                    
+                    // Show payment button for sponsors when connection is accepted
+                    const showPayButton = user.role === 'sponsor' && 
+                                        (notification.status === 'accepted' || isConnectionAccepted) && 
+                                        !isCurrentUserSender &&
+                                        listingDetails.amount > 0;
+
+                    const listingTitle = (listingDetails.title || 'Untitled Listing').replace(/'/g, "\\'");
+                    const notificationId = notification._id;
+                    const amount = listingDetails.amount || 0;
+
+                    return `
+                        <div class="notification-item ${notification.read ? '' : 'unread'}" 
+                            data-id="${notificationId}"
+                            data-email="${emailToUse}"
+                            data-listing-title="${listingTitle}">
+                            <div class="notification-header">
+                                <strong>${isCurrentUserSender ? (toUser.fullName || 'Unknown User') : (fromUser.fullName || 'Unknown User')}</strong>
+                                <span class="notification-time">${new Date(notification.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            <div class="notification-content">
+                                ${notification.content || getNotificationContent(notification, isCurrentUserSender, listingTitle)}
+                                ${notification.message ? `<p class="notification-message">${notification.message}</p>` : ''}
+                                ${showPayButton ? `
+                                    <div class="payment-info">
+                                        <p class="amount">Amount: ₹${amount}</p>
+                                        <button onclick="initiatePayment('${notificationId}', ${amount}, '${fromUser.fullName || 'Unknown User'}')" 
+                                                class="btn btn-primary">
+                                            <i class="fas fa-credit-card"></i> Pay Now
+                                        </button>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            ${notification.status === 'pending' && !isCurrentUserSender && isConnectionRequest ? `
+                                <div class="notification-actions">
+                                    <button class="btn btn-primary" onclick="respondToRequest('${notificationId}', 'accepted')">
+                                        Accept
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="respondToRequest('${notificationId}', 'rejected')">
+                                        Decline
+                                    </button>
+                                </div>
+                            ` : ''}
+                            ${showGmailButton && emailToUse ? `
+                                <div class="notification-actions">
+                                    <button onclick="sendGmailEmail(\`${emailToUse}\`, \`${listingTitle}\`, \`${notificationId}\`)" class="btn btn-primary">
+                                        <i class="fas fa-envelope"></i> Send Gmail
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } catch (error) {
+                    console.error('Error rendering notification:', error);
+                    return '';
+                }
+            }).join('');
+        }
+
+        // Helper function to generate notification content
+        function getNotificationContent(notification, isCurrentUserSender, listingTitle) {
+            const type = notification.type || 'unknown';
+            
+            switch(type) {
+                case 'connection_accepted':
+                    return isCurrentUserSender 
+                        ? `You accepted the connection request for "${listingTitle}"`
+                        : `Your connection request for "${listingTitle}" was accepted`;
+                case 'connection_request':
+                    return isCurrentUserSender
+                        ? `You sent a connection request for "${listingTitle}"`
+                        : `Wants to connect regarding "${listingTitle}"`;
+                default:
+                    return notification.content || 'New notification';
+            }
+        }
+
+        // Toggle notifications panel
+        function toggleNotifications() {
+            const panel = document.getElementById('notificationsPanel');
+            panel.classList.toggle('active');
+            if (panel.classList.contains('active')) {
+                fetchNotifications();
+            }
+        }
+
+        // Initialize notifications
+        document.addEventListener('DOMContentLoaded', () => {
+            updateNotificationCount();
+            // Set up periodic notification checks
+            setInterval(fetchNotifications, 30000); // Check every 30 seconds
+        });
+
+        // Existing scroll behavior
+        document.addEventListener('scroll', function() {
+            const header = document.querySelector('header');
+            if (window.scrollY > 20) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Add intersection observer for smooth animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe listing cards for scroll animations
+        document.querySelectorAll('.listing-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(50px)';
+            observer.observe(card);
+        });
+
+        // Add hover effect to profile stats
+        document.querySelectorAll('.stat-box').forEach(box => {
+            box.addEventListener('mouseenter', () => {
+                box.style.transform = 'translateY(-5px)';
+                box.style.background = 'rgba(255, 215, 0, 0.15)';
+            });
+            box.addEventListener('mouseleave', () => {
+                box.style.transform = 'translateY(0)';
+                box.style.background = 'rgba(255, 215, 0, 0.1)';
+            });
+        });
+
+        // Add ripple effect to buttons
+        function createRipple(event) {
+            const button = event.currentTarget;
+            const ripple = document.createElement('span');
+            const rect = button.getBoundingClientRect();
+            
+            ripple.style.position = 'absolute';
+            ripple.style.borderRadius = '50%';
+            ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+            ripple.style.width = ripple.style.height = '100px';
+            ripple.style.transform = 'scale(0)';
+            ripple.style.left = event.clientX - rect.left - 50 + 'px';
+            ripple.style.top = event.clientY - rect.top - 50 + 'px';
+            ripple.style.animation = 'ripple 0.6s linear';
+            
+            button.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        }
+
+        document.querySelectorAll('.btn-primary, .edit-profile-btn, .add-listing-btn').forEach(button => {
+            button.style.position = 'relative';
+            button.style.overflow = 'hidden';
+            button.addEventListener('click', createRipple);
+        });
+
+        // Add smooth scroll to top
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Show/hide scroll to top button
+        window.addEventListener('scroll', () => {
+            const scrollTopBtn = document.getElementById('scrollTopBtn');
+            if (scrollTopBtn) {
+                if (window.scrollY > 300) {
+                    scrollTopBtn.style.opacity = '1';
+                    scrollTopBtn.style.transform = 'translateY(0)';
+                } else {
+                    scrollTopBtn.style.opacity = '0';
+                    scrollTopBtn.style.transform = 'translateY(20px)';
+                }
+            }
+        });
+
+        // Existing modal functionality
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Flash message auto-hide and initial notifications fetch
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(message => {
+                setTimeout(() => {
+                    message.style.opacity = '0';
+                    setTimeout(() => message.remove(), 500);
+                }, 5000);
+            });
+
+            // Initial fetch for notifications
+            fetchNotifications();
+        });
+
+        // Edit Profile button handler
+        document.querySelector('.edit-profile-btn').addEventListener('click', function() {
+            openModal('editProfileModal');
+        });
+
+        // Add Listing button handler
+        document.querySelector('.add-listing-btn').addEventListener('click', function() {
+            document.getElementById('modalTitle').textContent = 'Create New Listing';
+            document.getElementById('submitButton').textContent = 'Create Listing';
+            document.getElementById('listingForm').reset();
+            document.getElementById('listingId').value = '';
+            openModal('listingModal');
+        });
+
+        async function editListing(id) {
+            try {
+                const card = document.querySelector(`.listing-card[data-id="${id}"]`);
+                if (!card) {
+                    console.error('Listing card not found');
+                    return;
+                }
+
+                const title = card.querySelector('.listing-title').textContent;
+                const description = card.querySelector('.listing-content p').textContent;
+                const domain = card.querySelector('.domain-tag').textContent.trim().replace(/^[^:]*:\s*/, '');
+                const amount = card.querySelector('.listing-amount').textContent.replace('$', '');
+
+                document.getElementById('modalTitle').textContent = 'Edit Listing';
+                document.getElementById('submitButton').textContent = 'Save Changes';
+                document.getElementById('listingId').value = id;
+                document.getElementById('title').value = title;
+                document.getElementById('description').value = description;
+                document.getElementById('domain').value = domain.toLowerCase();
+                document.getElementById('amount').value = amount;
+
+                openModal('listingModal');
+            } catch (error) {
+                console.error('Error preparing edit form:', error);
+                alert('Error preparing edit form. Please try again.');
+            }
+        }
+
+        async function handleListingSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const id = form.listingId.value;
+            const isEdit = !!id;
+
+            // Validate form data
+            const formData = {
+                title: form.title.value.trim(),
+                description: form.description.value.trim(),
+                domain: form.domain.value,
+                amount: form.amount.value
+            };
+
+            // Check if all fields are filled
+            if (!formData.title || !formData.description || !formData.domain || !formData.amount) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/profile/listing${isEdit ? `/${id}` : ''}`, {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        // Authentication error - redirect to login
+                        window.location.href = '/auth/login';
+                        return;
+                    }
+                    throw new Error(result.message || 'Error saving listing');
+                }
+
+                if (result.success) {
+                    closeModal('listingModal');
+                    window.location.reload();
+                } else {
+                    throw new Error(result.message || 'Error saving listing');
+                }
+            } catch (error) {
+                console.error('Error saving listing:', error);
+                alert(error.message || 'Error saving listing. Please try again.');
+            }
+        }
+
+        async function deleteListing(id) {
+            if (!id || !confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/profile/listing/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        // Authentication error - redirect to login
+                        window.location.href = '/auth/login';
+                        return;
+                    }
+                    throw new Error(result.message || 'Error deleting listing');
+                }
+
+                if (result.success) {
+                    const card = document.querySelector(`.listing-card[data-id="${id}"]`);
+                    if (card) {
+                        card.remove();
+                        const listingsGrid = document.querySelector('.listings-grid');
+                        if (!listingsGrid.querySelector('.listing-card')) {
+                            listingsGrid.innerHTML = `
+                                <div class="no-listings">
+                                    <p>No listings to display</p>
+                                    <p>Create your first listing to get started!</p>
+                                </div>
+                            `;
+                        }
+                    }
+                } else {
+                    throw new Error(result.message || 'Error deleting listing');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message || 'Error deleting listing. Please try again.');
+            }
+        }
+
+        // Respond to connection request
+        async function respondToRequest(notificationId, action) {
+            try {
+                const response = await fetch('/notifications/respond', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                        notificationId,
+                        action
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    fetchNotifications(); // Refresh notifications
+                    if (action === 'accepted') {
+                        const notification = notifications.find(n => n._id === notificationId);
+                        if (notification) {
+                            if (confirm('Connection request accepted! Would you like to send them an email through Gmail?')) {
+                                // Redirect to Gmail OAuth route
+                                const emailData = {
+                                    to: notification.from.email,
+                                    subject: `Re: ${notification.listingId.title}`,
+                                    notificationId: notificationId
+                                };
+                                window.location.href = `/auth/gmail?${new URLSearchParams(emailData).toString()}`;
+                            }
+                        }
+                    }
+                    alert(`Connection request ${action}`);
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message || 'Error responding to request');
+            }
+        }
+
+        // Add new function for Gmail sending
+        function sendGmailEmail(toEmail, listingTitle, notificationId) {
+            const emailData = {
+                to: toEmail,
+                subject: `Re: ${listingTitle}`,
+                notificationId: notificationId
+            };
+            window.location.href = `/auth/gmail?${new URLSearchParams(emailData).toString()}`;
+        }
+
+        // Check for new notifications periodically
+        const notificationInterval = setInterval(fetchNotifications, 30000); // Every 30 seconds
+
+        // Cleanup interval when page is unloaded
+        window.addEventListener('unload', () => {
+            clearInterval(notificationInterval);
+        });
+
+        async function handlePhotoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Check file type
+            if (!file.type.startsWith('image/')) {
+                showNotification('Please select an image file', 'error');
+                return;
+            }
+
+            // Check file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showNotification('Image size should be less than 5MB', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('photo', file);
+
+            try {
+                const response = await fetch('/profile/upload-photo', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Update the profile photo
+                    document.querySelector('.profile-avatar img').src = result.photoUrl;
+                    showNotification('Profile photo updated successfully', 'success');
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error('Error uploading photo:', error);
+                showNotification('Error uploading photo. Please try again.', 'error');
+            }
+        }
+
+        function showNotification(message, type = 'success') {
+            const container = document.getElementById('notification-container');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            const icon = document.createElement('i');
+            icon.className = `fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}`;
+            
+            const text = document.createElement('span');
+            text.textContent = message;
+            
+            notification.appendChild(icon);
+            notification.appendChild(text);
+            container.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'fadeOut 0.3s ease forwards';
+                setTimeout(() => {
+                    container.removeChild(notification);
+                }, 300);
+            }, 5000);
+        }
+
+        // Function to toggle payment fields based on selected payment method
+        function togglePaymentFields() {
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const bankSection = document.getElementById('bankDetailsSection');
+            const upiSection = document.getElementById('upiSection');
+            
+            // Hide both sections first
+            bankSection.style.display = 'none';
+            upiSection.style.display = 'none';
+            
+            // Show selected section
+            if (paymentMethod === 'bank') {
+                bankSection.style.display = 'block';
+            } else if (paymentMethod === 'upi') {
+                upiSection.style.display = 'block';
+            }
+            
+            // Clear the fields of the unselected method
+            if (paymentMethod === 'bank') {
+                document.getElementById('upiId').value = '';
+            } else if (paymentMethod === 'upi') {
+                document.getElementById('bankName').value = '';
+                document.getElementById('accountNumber').value = '';
+                document.getElementById('ifscCode').value = '';
+                document.getElementById('accountHolderName').value = '';
+            }
+        }
+
+        // Initialize payment method toggle on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            togglePaymentFields();
+            validatePaymentDetails();
+        });
+
+        // Update payment details validation
+        function validatePaymentDetails() {
+            const paymentMethod = document.getElementById('paymentMethod');
+            const bankName = document.getElementById('bankName');
+            const accountNumber = document.getElementById('accountNumber');
+            const ifscCode = document.getElementById('ifscCode');
+            const accountHolderName = document.getElementById('accountHolderName');
+            const upiId = document.getElementById('upiId');
+
+            // Bank account number validation
+            accountNumber.addEventListener('input', function() {
+                const isValid = /^[0-9]{9,18}$/.test(this.value);
+                if (this.value && !isValid) {
+                    this.setCustomValidity('Account number must be between 9 and 18 digits');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+
+            // IFSC code validation
+            ifscCode.addEventListener('input', function() {
+                const isValid = /^[A-Z]{4}0[A-Z0-9]{6}$/.test(this.value);
+                if (this.value && !isValid) {
+                    this.setCustomValidity('Please enter a valid IFSC code (e.g., HDFC0123456)');
+                } else {
+                    this.setCustomValidity('');
+                }
+                this.value = this.value.toUpperCase();
+            });
+
+            // UPI ID validation
+            upiId.addEventListener('input', function() {
+                const isValid = /^[\w\.\-]+@[\w\.\-]+$/.test(this.value);
+                if (this.value && !isValid) {
+                    this.setCustomValidity('Please enter a valid UPI ID (e.g., username@upi)');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+
+            // Form submission validation
+            document.querySelector('form').addEventListener('submit', function(event) {
+                const selectedMethod = paymentMethod.value;
+                
+                if (selectedMethod === 'bank') {
+                    // Validate bank details
+                    if (!bankName.value || !accountNumber.value || !ifscCode.value || !accountHolderName.value) {
+                        event.preventDefault();
+                        alert('Please fill in all bank details fields');
+                    }
+                } else if (selectedMethod === 'upi') {
+                    // Validate UPI ID
+                    if (!upiId.value) {
+                        event.preventDefault();
+                        alert('Please enter your UPI ID');
+                    }
+                }
+            });
+        }
+
+        // Add profile completion check
+        function isProfileComplete() {
+            const user = {
+                paymentMethod: document.getElementById('paymentMethod').value,
+                bankDetails: {
+                    bankName: document.getElementById('bankName').value,
+                    accountNumber: document.getElementById('accountNumber').value,
+                    ifscCode: document.getElementById('ifscCode').value,
+                    accountHolderName: document.getElementById('accountHolderName').value
+                },
+                upiId: document.getElementById('upiId').value
+            };
+
+            // Check if either bank details or UPI is complete
+            const hasBankDetails = user.paymentMethod === 'bank' && 
+                user.bankDetails.bankName && 
+                user.bankDetails.accountNumber && 
+                user.bankDetails.ifscCode && 
+                user.bankDetails.accountHolderName;
+            
+            const hasUPI = user.paymentMethod === 'upi' && user.upiId;
+
+            return hasBankDetails || hasUPI;
+        }
+
+        // Modify the connect button click handler
+        function handleConnectClick(sponsorId, listingId, listingTitle) {
+            if (!isProfileComplete()) {
+                openModal('incompleteProfileModal');
+                return;
+            }
+            openConnectModal(sponsorId, listingId, listingTitle);
+        }
+
+        // Add payment handling for sponsors
+        function showPaymentModal(recipientId, notificationId, recipientDetails) {
+            // Clear previous form data
+            document.getElementById('paymentForm').reset();
+            
+            // Set form values
+            document.getElementById('recipientUserId').value = recipientId;
+            document.getElementById('notificationId').value = notificationId;
+            
+            let detailsHtml = '';
+            if (recipientDetails.bankDetails) {
+                detailsHtml = `
+                    <p><i class="fas fa-user"></i> <strong>Account Holder:</strong> ${recipientDetails.bankDetails.accountHolderName}</p>
+                    <p><i class="fas fa-university"></i> <strong>Bank Name:</strong> ${recipientDetails.bankDetails.bankName}</p>
+                    <p><i class="fas fa-hashtag"></i> <strong>Account Number:</strong> ${recipientDetails.bankDetails.accountNumber}</p>
+                    <p><i class="fas fa-code"></i> <strong>IFSC Code:</strong> ${recipientDetails.bankDetails.ifscCode}</p>
+                    <input type="hidden" id="paymentMethod" value="bank">
+                `;
+            } else if (recipientDetails.upiId) {
+                detailsHtml = `
+                    <p><i class="fas fa-qrcode"></i> <strong>UPI ID:</strong> ${recipientDetails.upiId}</p>
+                    <input type="hidden" id="paymentMethod" value="upi">
+                `;
+            }
+            document.getElementById('recipientInfo').innerHTML = detailsHtml;
+            
+            // Add amount validation
+            const amountInput = document.getElementById('paymentAmount');
+            amountInput.addEventListener('input', function() {
+                const amount = parseFloat(this.value);
+                if (amount <= 0) {
+                    this.setCustomValidity('Amount must be greater than 0');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+            
+            openModal('paymentModal');
+        }
+
+        async function handlePaymentSubmit(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const amount = document.getElementById('paymentAmount').value;
+            const recipientId = document.getElementById('recipientUserId').value;
+            const notificationId = document.getElementById('notificationId').value;
+
+            // Validate required fields
+            if (!amount || amount <= 0) {
+                showNotification('Please enter a valid amount', 'error');
+                return;
+            }
+
+            if (!recipientId || !notificationId) {
+                showNotification('Missing recipient information', 'error');
+                return;
+            }
+
+            const paymentData = {
+                amount: parseFloat(amount),
+                recipientId: recipientId,
+                notificationId: notificationId,
+                status: 'pending',
+                timestamp: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch('/api/payments/process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(paymentData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Payment processing failed');
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    closeModal('paymentModal');
+                    showNotification('Payment completed successfully!', 'success');
+                    // Refresh the page after a short delay
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    throw new Error(result.message || 'Payment failed');
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                showNotification(error.message || 'Error processing payment. Please try again.', 'error');
+            }
+        }
+    </script>
+</body>
+</html>
