@@ -22,9 +22,25 @@ const transactionSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    transactionId: {
+        type: String,
+        required: true
+    },
+    paymentMethod: {
+        type: String,
+        required: true
+    },
     counterparty: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
+        required: true
+    },
+    listingTitle: {
+        type: String,
+        default: 'Sponsorship Payment'
+    },
+    counterpartyName: {
+        type: String,
         required: true
     }
 });

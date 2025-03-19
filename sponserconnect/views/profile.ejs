@@ -1339,35 +1339,6 @@
                 grid-template-columns: 1fr;
             }
         }
-
-        .payment-info .btn-primary {
-            background: linear-gradient(45deg, var(--accent-gold), #FFA500);
-            color: var(--black-primary);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-            margin-top: 1rem;
-        }
-
-        .payment-info .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
-        }
-
-        .payment-info .btn-primary:disabled {
-            background: #666;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
     </style>
 </head>
 <body>
@@ -1424,7 +1395,7 @@
                 
                 <div class="profile-stats">
                     <div class="stat-box">
-                        <div class="stat-value">$<%= user.role === 'sponsor' ? (totalSponsored || 0) : (totalReceived || 0) %></div>
+                        <div class="stat-value">₹<%= user.role === 'sponsor' ? (totalSponsored || 0) : (totalReceived || 0) %></div>
                         <div class="stat-label">Total <%= user.role === 'sponsor' ? 'Given' : 'Received' %></div>
                     </div>
                     <div class="stat-box">
@@ -1438,10 +1409,10 @@
                     <% if (user.role === 'sponsor') { %>
                         <p><i class="fas fa-building"></i> <%= user.companyName || 'Not specified' %></p>
                         <p><i class="fas fa-globe"></i> <%= user.website || 'Not specified' %></p>
-                        <p><i class="fas fa-wallet"></i> $<%= user.budget || 0 %></p>
+                        <p><i class="fas fa-wallet"></i> ₹<%= user.budget || 0 %></p>
                     <% } else { %>
                         <p><i class="fas fa-tag"></i> <%= user.eventDomain || 'Not specified' %></p>
-                        <p><i class="fas fa-money-bill-wave"></i> $<%= user.amountNeeded || 0 %></p>
+                        <p><i class="fas fa-money-bill-wave"></i> ₹<%= user.amountNeeded || 0 %></p>
                     <% } %>
                 </div>
 
@@ -1498,7 +1469,7 @@
 
                                 <div class="listing-footer">
                                     <div class="listing-amount">
-                                        $<%= listing.amount %>
+                                        ₹<%= listing.amount %>
                                     </div>
                                     <div class="listing-status <%= listing.status.toLowerCase() %>">
                                         <%= listing.status %>
@@ -1748,7 +1719,14 @@
                 <h2>Transaction History</h2>
         <% if (user.transactions && user.transactions.length > 0) { %>
             <div class="transaction-grid">
-                <% user.transactions.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(transaction => { %>
+                        <% user.transactions
+                            .filter(transaction => {
+                                // For sponsors, only show sent transactions
+                                // For users looking for sponsorship, only show received transactions
+                                return user.role === 'sponsor' ? transaction.type === 'sent' : transaction.type === 'received';
+                            })
+                            .sort((a, b) => new Date(b.date) - new Date(a.date))
+                            .forEach(transaction => { %>
                     <div class="transaction-card <%= transaction.type %>">
                                 <div class="transaction-header">
                             <div class="transaction-type <%= transaction.type %>">
@@ -1777,7 +1755,7 @@
                             <div class="transaction-counterparty">
                                 <i class="fas fa-user"></i>
                                 <%= transaction.type === 'sent' ? 'To' : 'From' %>: 
-                                <%= transaction.counterpartyName || 'User' %>
+                                        <%= transaction.counterpartyName || (transaction.type === 'sent' ? transaction.receiverName : transaction.senderName) || 'User' %>
                                     </div>
                             <div class="transaction-method">
                                 <i class="fas fa-credit-card"></i>
@@ -1820,12 +1798,17 @@
 
         // Update notification count badge
         function updateNotificationCount() {
+            console.log('Updating notification count:', unreadCount);
             const countElement = document.querySelector('.notification-count');
+            if (countElement) {
             if (unreadCount > 0) {
                 countElement.style.display = 'block';
                 countElement.textContent = unreadCount;
             } else {
                 countElement.style.display = 'none';
+                }
+            } else {
+                console.error('Notification count element not found');
             }
         }
 
@@ -1844,6 +1827,226 @@
             } catch (error) {
                 console.error('Error fetching notifications:', error);
             }
+        }
+
+        // Initialize all event listeners when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Edit Profile button handler
+            const editProfileBtn = document.querySelector('.edit-profile-btn');
+            if (editProfileBtn) {
+                editProfileBtn.addEventListener('click', function() {
+                    console.log('Edit profile button clicked');
+                    openModal('editProfileModal');
+                });
+            }
+
+            // Add Listing button handler
+            const addListingBtn = document.querySelector('.add-listing-btn');
+            if (addListingBtn) {
+                addListingBtn.addEventListener('click', function() {
+                    console.log('Add listing button clicked');
+                    document.getElementById('modalTitle').textContent = 'Create New Listing';
+                    document.getElementById('submitButton').textContent = 'Create Listing';
+                    document.getElementById('listingForm').reset();
+                    document.getElementById('listingId').value = '';
+                    openModal('listingModal');
+                });
+            }
+
+            // Initialize payment method toggle
+            togglePaymentFields();
+            validatePaymentDetails();
+
+            // Initialize notifications
+            updateNotificationCount();
+            // Set up periodic notification checks
+            setInterval(fetchNotifications, 30000); // Check every 30 seconds
+        });
+
+        // Toggle notifications panel
+        function toggleNotifications() {
+            const panel = document.getElementById('notificationsPanel');
+            panel.classList.toggle('active');
+            if (panel.classList.contains('active')) {
+                fetchNotifications();
+            }
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            console.log('Opening modal:', modalId);
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'block';
+                console.log('Modal opened successfully');
+            } else {
+                console.error('Modal not found:', modalId);
+            }
+        }
+
+        function closeModal(modalId) {
+            console.log('Closing modal:', modalId);
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+                console.log('Modal closed successfully');
+                } else {
+                console.error('Modal not found:', modalId);
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Edit listing function
+        async function editListing(id) {
+            console.log('Editing listing:', id);
+            try {
+                const card = document.querySelector(`.listing-card[data-id="${id}"]`);
+                if (!card) {
+                    console.error('Listing card not found');
+                    return;
+                }
+
+                const title = card.querySelector('.listing-title').textContent;
+                const description = card.querySelector('.listing-content p').textContent;
+                const domain = card.querySelector('.domain-tag').textContent.trim().replace(/^[^:]*:\s*/, '');
+                const amount = card.querySelector('.listing-amount').textContent.replace('₹', '');
+
+                document.getElementById('modalTitle').textContent = 'Edit Listing';
+                document.getElementById('submitButton').textContent = 'Save Changes';
+                document.getElementById('listingId').value = id;
+                document.getElementById('title').value = title;
+                document.getElementById('description').value = description;
+                document.getElementById('domain').value = domain.toLowerCase();
+                document.getElementById('amount').value = amount;
+
+                openModal('listingModal');
+                console.log('Edit form prepared successfully');
+            } catch (error) {
+                console.error('Error preparing edit form:', error);
+                alert('Error preparing edit form. Please try again.');
+            }
+        }
+
+        // Delete listing function
+        async function deleteListing(id) {
+            console.log('Deleting listing:', id);
+            if (!id || !confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/profile/listing/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        window.location.href = '/auth/login';
+                        return;
+                    }
+                    throw new Error(result.message || 'Error deleting listing');
+                }
+
+                if (result.success) {
+                    const card = document.querySelector(`.listing-card[data-id="${id}"]`);
+                    if (card) {
+                        card.remove();
+                        const listingsGrid = document.querySelector('.listings-grid');
+                        if (!listingsGrid.querySelector('.listing-card')) {
+                            listingsGrid.innerHTML = `
+                                <div class="no-listings">
+                                    <p>No listings to display</p>
+                                    <p>Create your first listing to get started!</p>
+                                </div>
+                            `;
+                        }
+                        console.log('Listing deleted successfully');
+                    }
+                } else {
+                    throw new Error(result.message || 'Error deleting listing');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message || 'Error deleting listing. Please try again.');
+            }
+        }
+
+        // Handle listing form submission
+        async function handleListingSubmit(event) {
+            event.preventDefault();
+            console.log('Submitting listing form');
+            const form = event.target;
+            const id = form.listingId.value;
+            const isEdit = !!id;
+
+            // Validate form data
+            const formData = {
+                title: form.title.value.trim(),
+                description: form.description.value.trim(),
+                domain: form.domain.value,
+                amount: form.amount.value
+            };
+
+            // Check if all fields are filled
+            if (!formData.title || !formData.description || !formData.domain || !formData.amount) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/profile/listing${isEdit ? `/${id}` : ''}`, {
+                    method: isEdit ? 'PUT' : 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        window.location.href = '/auth/login';
+                        return;
+                    }
+                    throw new Error(result.message || 'Error saving listing');
+                }
+
+                if (result.success) {
+                    closeModal('listingModal');
+                    window.location.reload();
+                    console.log('Listing saved successfully');
+                } else {
+                    throw new Error(result.message || 'Error saving listing');
+                }
+            } catch (error) {
+                console.error('Error saving listing:', error);
+                alert(error.message || 'Error saving listing. Please try again.');
+            }
+        }
+
+        // Add Gmail sending functionality
+        function sendGmailEmail(toEmail, listingTitle, notificationId) {
+            console.log('Sending Gmail to:', toEmail, 'for listing:', listingTitle);
+            const emailData = {
+                to: toEmail,
+                subject: `Re: ${listingTitle}`,
+                notificationId: notificationId
+            };
+            window.location.href = `/auth/gmail?${new URLSearchParams(emailData).toString()}`;
         }
 
         // Render notifications in the panel
@@ -1908,7 +2111,7 @@
                                         <p class="amount">Amount: ₹${amount}</p>
                                         <button onclick="initiatePayment('${notificationId}', ${amount}, '${fromUser.fullName || 'Unknown User'}')" 
                                                 class="btn btn-primary">
-                                            <i class="fas fa-credit-card"></i> Pay Now
+                                            <i class="fas fa-credit-card"></i> Complete Payment
                                         </button>
                                     </div>
                                 ` : ''}
@@ -1954,636 +2157,6 @@
                         : `Wants to connect regarding "${listingTitle}"`;
                 default:
                     return notification.content || 'New notification';
-            }
-        }
-
-        // Toggle notifications panel
-        function toggleNotifications() {
-            const panel = document.getElementById('notificationsPanel');
-            panel.classList.toggle('active');
-            if (panel.classList.contains('active')) {
-                fetchNotifications();
-            }
-        }
-
-        // Initialize notifications
-        document.addEventListener('DOMContentLoaded', () => {
-            updateNotificationCount();
-            // Set up periodic notification checks
-            setInterval(fetchNotifications, 30000); // Check every 30 seconds
-        });
-
-        // Existing scroll behavior
-        document.addEventListener('scroll', function() {
-            const header = document.querySelector('header');
-            if (window.scrollY > 20) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
-        });
-
-        // Add intersection observer for smooth animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        // Observe listing cards for scroll animations
-        document.querySelectorAll('.listing-card').forEach(card => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(50px)';
-            observer.observe(card);
-        });
-
-        // Add hover effect to profile stats
-        document.querySelectorAll('.stat-box').forEach(box => {
-            box.addEventListener('mouseenter', () => {
-                box.style.transform = 'translateY(-5px)';
-                box.style.background = 'rgba(255, 215, 0, 0.15)';
-            });
-            box.addEventListener('mouseleave', () => {
-                box.style.transform = 'translateY(0)';
-                box.style.background = 'rgba(255, 215, 0, 0.1)';
-            });
-        });
-
-        // Add ripple effect to buttons
-        function createRipple(event) {
-            const button = event.currentTarget;
-            const ripple = document.createElement('span');
-            const rect = button.getBoundingClientRect();
-            
-            ripple.style.position = 'absolute';
-            ripple.style.borderRadius = '50%';
-            ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
-            ripple.style.width = ripple.style.height = '100px';
-            ripple.style.transform = 'scale(0)';
-            ripple.style.left = event.clientX - rect.left - 50 + 'px';
-            ripple.style.top = event.clientY - rect.top - 50 + 'px';
-            ripple.style.animation = 'ripple 0.6s linear';
-            
-            button.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 600);
-        }
-
-        document.querySelectorAll('.btn-primary, .edit-profile-btn, .add-listing-btn').forEach(button => {
-            button.style.position = 'relative';
-            button.style.overflow = 'hidden';
-            button.addEventListener('click', createRipple);
-        });
-
-        // Add smooth scroll to top
-        function scrollToTop() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        }
-
-        // Show/hide scroll to top button
-        window.addEventListener('scroll', () => {
-            const scrollTopBtn = document.getElementById('scrollTopBtn');
-            if (scrollTopBtn) {
-                if (window.scrollY > 300) {
-                    scrollTopBtn.style.opacity = '1';
-                    scrollTopBtn.style.transform = 'translateY(0)';
-                } else {
-                    scrollTopBtn.style.opacity = '0';
-                    scrollTopBtn.style.transform = 'translateY(20px)';
-                }
-            }
-        });
-
-        // Existing modal functionality
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'block';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
-            }
-        }
-
-        // Flash message auto-hide and initial notifications fetch
-        document.addEventListener('DOMContentLoaded', function() {
-            const flashMessages = document.querySelectorAll('.flash-message');
-            flashMessages.forEach(message => {
-                setTimeout(() => {
-                    message.style.opacity = '0';
-                    setTimeout(() => message.remove(), 500);
-                }, 5000);
-            });
-
-            // Initial fetch for notifications
-            fetchNotifications();
-        });
-
-        // Edit Profile button handler
-        document.querySelector('.edit-profile-btn').addEventListener('click', function() {
-            openModal('editProfileModal');
-        });
-
-        // Add Listing button handler
-        document.querySelector('.add-listing-btn').addEventListener('click', function() {
-            document.getElementById('modalTitle').textContent = 'Create New Listing';
-            document.getElementById('submitButton').textContent = 'Create Listing';
-            document.getElementById('listingForm').reset();
-            document.getElementById('listingId').value = '';
-            openModal('listingModal');
-        });
-
-        async function editListing(id) {
-            try {
-                const card = document.querySelector(`.listing-card[data-id="${id}"]`);
-                if (!card) {
-                    console.error('Listing card not found');
-                    return;
-                }
-
-                const title = card.querySelector('.listing-title').textContent;
-                const description = card.querySelector('.listing-content p').textContent;
-                const domain = card.querySelector('.domain-tag').textContent.trim().replace(/^[^:]*:\s*/, '');
-                const amount = card.querySelector('.listing-amount').textContent.replace('$', '');
-
-                document.getElementById('modalTitle').textContent = 'Edit Listing';
-                document.getElementById('submitButton').textContent = 'Save Changes';
-                document.getElementById('listingId').value = id;
-                document.getElementById('title').value = title;
-                document.getElementById('description').value = description;
-                document.getElementById('domain').value = domain.toLowerCase();
-                document.getElementById('amount').value = amount;
-
-                openModal('listingModal');
-            } catch (error) {
-                console.error('Error preparing edit form:', error);
-                alert('Error preparing edit form. Please try again.');
-            }
-        }
-
-        async function handleListingSubmit(event) {
-            event.preventDefault();
-            const form = event.target;
-            const id = form.listingId.value;
-            const isEdit = !!id;
-
-            // Validate form data
-            const formData = {
-                title: form.title.value.trim(),
-                description: form.description.value.trim(),
-                domain: form.domain.value,
-                amount: form.amount.value
-            };
-
-            // Check if all fields are filled
-            if (!formData.title || !formData.description || !formData.domain || !formData.amount) {
-                alert('Please fill in all required fields');
-                return;
-            }
-
-            try {
-                const response = await fetch(`/profile/listing${isEdit ? `/${id}` : ''}`, {
-                    method: isEdit ? 'PUT' : 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                });
-
-                const result = await response.json();
-
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        // Authentication error - redirect to login
-                        window.location.href = '/auth/login';
-                        return;
-                    }
-                    throw new Error(result.message || 'Error saving listing');
-                }
-
-                if (result.success) {
-                    closeModal('listingModal');
-                    window.location.reload();
-                } else {
-                    throw new Error(result.message || 'Error saving listing');
-                }
-            } catch (error) {
-                console.error('Error saving listing:', error);
-                alert(error.message || 'Error saving listing. Please try again.');
-            }
-        }
-
-        async function deleteListing(id) {
-            if (!id || !confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`/profile/listing/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                });
-
-                const result = await response.json();
-
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        // Authentication error - redirect to login
-                        window.location.href = '/auth/login';
-                        return;
-                    }
-                    throw new Error(result.message || 'Error deleting listing');
-                }
-
-                if (result.success) {
-                    const card = document.querySelector(`.listing-card[data-id="${id}"]`);
-                    if (card) {
-                        card.remove();
-                        const listingsGrid = document.querySelector('.listings-grid');
-                        if (!listingsGrid.querySelector('.listing-card')) {
-                            listingsGrid.innerHTML = `
-                                <div class="no-listings">
-                                    <p>No listings to display</p>
-                                    <p>Create your first listing to get started!</p>
-                                </div>
-                            `;
-                        }
-                    }
-                } else {
-                    throw new Error(result.message || 'Error deleting listing');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert(error.message || 'Error deleting listing. Please try again.');
-            }
-        }
-
-        // Respond to connection request
-        async function respondToRequest(notificationId, action) {
-            try {
-                const response = await fetch('/notifications/respond', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                        notificationId,
-                        action
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    fetchNotifications(); // Refresh notifications
-                    if (action === 'accepted') {
-                        const notification = notifications.find(n => n._id === notificationId);
-                        if (notification) {
-                            if (confirm('Connection request accepted! Would you like to send them an email through Gmail?')) {
-                                // Redirect to Gmail OAuth route
-                                const emailData = {
-                                    to: notification.from.email,
-                                    subject: `Re: ${notification.listingId.title}`,
-                                    notificationId: notificationId
-                                };
-                                window.location.href = `/auth/gmail?${new URLSearchParams(emailData).toString()}`;
-                            }
-                        }
-                    }
-                    alert(`Connection request ${action}`);
-                } else {
-                    throw new Error(result.message);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert(error.message || 'Error responding to request');
-            }
-        }
-
-        // Add new function for Gmail sending
-        function sendGmailEmail(toEmail, listingTitle, notificationId) {
-            const emailData = {
-                to: toEmail,
-                subject: `Re: ${listingTitle}`,
-                notificationId: notificationId
-            };
-            window.location.href = `/auth/gmail?${new URLSearchParams(emailData).toString()}`;
-        }
-
-        // Check for new notifications periodically
-        const notificationInterval = setInterval(fetchNotifications, 30000); // Every 30 seconds
-
-        // Cleanup interval when page is unloaded
-        window.addEventListener('unload', () => {
-            clearInterval(notificationInterval);
-        });
-
-        async function handlePhotoUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            // Check file type
-            if (!file.type.startsWith('image/')) {
-                showNotification('Please select an image file', 'error');
-                return;
-            }
-
-            // Check file size (max 5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                showNotification('Image size should be less than 5MB', 'error');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('photo', file);
-
-            try {
-                const response = await fetch('/profile/upload-photo', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    // Update the profile photo
-                    document.querySelector('.profile-avatar img').src = result.photoUrl;
-                    showNotification('Profile photo updated successfully', 'success');
-                } else {
-                    throw new Error(result.message);
-                }
-            } catch (error) {
-                console.error('Error uploading photo:', error);
-                showNotification('Error uploading photo. Please try again.', 'error');
-            }
-        }
-
-        function showNotification(message, type = 'success') {
-            const container = document.getElementById('notification-container');
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            
-            const icon = document.createElement('i');
-            icon.className = `fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}`;
-            
-            const text = document.createElement('span');
-            text.textContent = message;
-            
-            notification.appendChild(icon);
-            notification.appendChild(text);
-            container.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.animation = 'fadeOut 0.3s ease forwards';
-                setTimeout(() => {
-                    container.removeChild(notification);
-                }, 300);
-            }, 5000);
-        }
-
-        // Function to toggle payment fields based on selected payment method
-        function togglePaymentFields() {
-            const paymentMethod = document.getElementById('paymentMethod').value;
-            const bankSection = document.getElementById('bankDetailsSection');
-            const upiSection = document.getElementById('upiSection');
-            
-            // Hide both sections first
-            bankSection.style.display = 'none';
-            upiSection.style.display = 'none';
-            
-            // Show selected section
-            if (paymentMethod === 'bank') {
-                bankSection.style.display = 'block';
-            } else if (paymentMethod === 'upi') {
-                upiSection.style.display = 'block';
-            }
-            
-            // Clear the fields of the unselected method
-            if (paymentMethod === 'bank') {
-                document.getElementById('upiId').value = '';
-            } else if (paymentMethod === 'upi') {
-                document.getElementById('bankName').value = '';
-                document.getElementById('accountNumber').value = '';
-                document.getElementById('ifscCode').value = '';
-                document.getElementById('accountHolderName').value = '';
-            }
-        }
-
-        // Initialize payment method toggle on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            togglePaymentFields();
-            validatePaymentDetails();
-        });
-
-        // Update payment details validation
-        function validatePaymentDetails() {
-            const paymentMethod = document.getElementById('paymentMethod');
-            const bankName = document.getElementById('bankName');
-            const accountNumber = document.getElementById('accountNumber');
-            const ifscCode = document.getElementById('ifscCode');
-            const accountHolderName = document.getElementById('accountHolderName');
-            const upiId = document.getElementById('upiId');
-
-            // Bank account number validation
-            accountNumber.addEventListener('input', function() {
-                const isValid = /^[0-9]{9,18}$/.test(this.value);
-                if (this.value && !isValid) {
-                    this.setCustomValidity('Account number must be between 9 and 18 digits');
-                } else {
-                    this.setCustomValidity('');
-                }
-            });
-
-            // IFSC code validation
-            ifscCode.addEventListener('input', function() {
-                const isValid = /^[A-Z]{4}0[A-Z0-9]{6}$/.test(this.value);
-                if (this.value && !isValid) {
-                    this.setCustomValidity('Please enter a valid IFSC code (e.g., HDFC0123456)');
-                } else {
-                    this.setCustomValidity('');
-                }
-                this.value = this.value.toUpperCase();
-            });
-
-            // UPI ID validation
-            upiId.addEventListener('input', function() {
-                const isValid = /^[\w\.\-]+@[\w\.\-]+$/.test(this.value);
-                if (this.value && !isValid) {
-                    this.setCustomValidity('Please enter a valid UPI ID (e.g., username@upi)');
-                } else {
-                    this.setCustomValidity('');
-                }
-            });
-
-            // Form submission validation
-            document.querySelector('form').addEventListener('submit', function(event) {
-                const selectedMethod = paymentMethod.value;
-                
-                if (selectedMethod === 'bank') {
-                    // Validate bank details
-                    if (!bankName.value || !accountNumber.value || !ifscCode.value || !accountHolderName.value) {
-                        event.preventDefault();
-                        alert('Please fill in all bank details fields');
-                    }
-                } else if (selectedMethod === 'upi') {
-                    // Validate UPI ID
-                    if (!upiId.value) {
-                        event.preventDefault();
-                        alert('Please enter your UPI ID');
-                    }
-                }
-            });
-        }
-
-        // Add profile completion check
-        function isProfileComplete() {
-            const user = {
-                paymentMethod: document.getElementById('paymentMethod').value,
-                bankDetails: {
-                    bankName: document.getElementById('bankName').value,
-                    accountNumber: document.getElementById('accountNumber').value,
-                    ifscCode: document.getElementById('ifscCode').value,
-                    accountHolderName: document.getElementById('accountHolderName').value
-                },
-                upiId: document.getElementById('upiId').value
-            };
-
-            // Check if either bank details or UPI is complete
-            const hasBankDetails = user.paymentMethod === 'bank' && 
-                user.bankDetails.bankName && 
-                user.bankDetails.accountNumber && 
-                user.bankDetails.ifscCode && 
-                user.bankDetails.accountHolderName;
-            
-            const hasUPI = user.paymentMethod === 'upi' && user.upiId;
-
-            return hasBankDetails || hasUPI;
-        }
-
-        // Modify the connect button click handler
-        function handleConnectClick(sponsorId, listingId, listingTitle) {
-            if (!isProfileComplete()) {
-                openModal('incompleteProfileModal');
-                return;
-            }
-            openConnectModal(sponsorId, listingId, listingTitle);
-        }
-
-        // Add payment handling for sponsors
-        function showPaymentModal(recipientId, notificationId, recipientDetails) {
-            // Clear previous form data
-            document.getElementById('paymentForm').reset();
-            
-            // Set form values
-            document.getElementById('recipientUserId').value = recipientId;
-            document.getElementById('notificationId').value = notificationId;
-            
-            let detailsHtml = '';
-            if (recipientDetails.bankDetails) {
-                detailsHtml = `
-                    <p><i class="fas fa-user"></i> <strong>Account Holder:</strong> ${recipientDetails.bankDetails.accountHolderName}</p>
-                    <p><i class="fas fa-university"></i> <strong>Bank Name:</strong> ${recipientDetails.bankDetails.bankName}</p>
-                    <p><i class="fas fa-hashtag"></i> <strong>Account Number:</strong> ${recipientDetails.bankDetails.accountNumber}</p>
-                    <p><i class="fas fa-code"></i> <strong>IFSC Code:</strong> ${recipientDetails.bankDetails.ifscCode}</p>
-                    <input type="hidden" id="paymentMethod" value="bank">
-                `;
-            } else if (recipientDetails.upiId) {
-                detailsHtml = `
-                    <p><i class="fas fa-qrcode"></i> <strong>UPI ID:</strong> ${recipientDetails.upiId}</p>
-                    <input type="hidden" id="paymentMethod" value="upi">
-                `;
-            }
-            document.getElementById('recipientInfo').innerHTML = detailsHtml;
-            
-            // Add amount validation
-            const amountInput = document.getElementById('paymentAmount');
-            amountInput.addEventListener('input', function() {
-                const amount = parseFloat(this.value);
-                if (amount <= 0) {
-                    this.setCustomValidity('Amount must be greater than 0');
-                } else {
-                    this.setCustomValidity('');
-                }
-            });
-            
-            openModal('paymentModal');
-        }
-
-        async function handlePaymentSubmit(event) {
-            event.preventDefault();
-            
-            const form = event.target;
-            const amount = document.getElementById('paymentAmount').value;
-            const recipientId = document.getElementById('recipientUserId').value;
-            const notificationId = document.getElementById('notificationId').value;
-
-            // Validate required fields
-            if (!amount || amount <= 0) {
-                showNotification('Please enter a valid amount', 'error');
-                return;
-            }
-
-            if (!recipientId || !notificationId) {
-                showNotification('Missing recipient information', 'error');
-                return;
-            }
-
-            const paymentData = {
-                amount: parseFloat(amount),
-                recipientId: recipientId,
-                notificationId: notificationId,
-                status: 'pending',
-                timestamp: new Date().toISOString()
-            };
-
-            try {
-                const response = await fetch('/api/payments/process', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(paymentData)
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Payment processing failed');
-                }
-
-                const result = await response.json();
-
-                if (result.success) {
-                    closeModal('paymentModal');
-                    showNotification('Payment completed successfully!', 'success');
-                    // Refresh the page after a short delay
-                    setTimeout(() => window.location.reload(), 1500);
-                } else {
-                    throw new Error(result.message || 'Payment failed');
-                }
-            } catch (error) {
-                console.error('Payment error:', error);
-                showNotification(error.message || 'Error processing payment. Please try again.', 'error');
             }
         }
     </script>

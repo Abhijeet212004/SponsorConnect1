@@ -118,6 +118,44 @@ router.post('/respond', async (req, res) => {
         }
 
         notification.status = action;
+        if (action === 'accepted') {
+            notification.paymentStatus = 'pending';
+            
+            // Log the notification and user details for debugging
+            console.log('Original notification:', {
+                from: notification.from._id,
+                to: notification.to,
+                listingId: notification.listingId ? notification.listingId._id : null
+            });
+            
+            // If this is a creator accepting a sponsor's request, we need to use the creator's listing
+            if (req.user.role === 'sponsored') {
+                try {
+                    // Try to find the creator's own listing with their requested amount
+                    const creatorListing = await Listing.findOne({ 
+                        user: req.user._id,
+                        status: 'active'
+                    }).sort('-createdAt');
+                    
+                    if (creatorListing) {
+                        console.log('Found creator listing:', {
+                            id: creatorListing._id,
+                            title: creatorListing.title,
+                            amount: creatorListing.amount,
+                            user: creatorListing.user
+                        });
+                        
+                        // Update the notification to use the creator's listing
+                        notification.creatorListingId = creatorListing._id;
+                        
+                        // Save the creator's amount for reference (keep the original listingId too)
+                        notification.creatorAmount = creatorListing.amount;
+                    }
+                } catch (error) {
+                    console.error('Error finding creator listing:', error);
+                }
+            }
+        }
         await notification.save();
 
         if (action === 'accepted') {
@@ -132,7 +170,8 @@ router.post('/respond', async (req, res) => {
                 listingId: notification.listingId._id,
                 content: content,
                 message: `You can now contact ${req.user.fullName} at ${req.user.email}`,
-                status: 'accepted'
+                status: 'accepted',
+                paymentStatus: 'pending'
             });
             
             await acceptanceNotification.save();

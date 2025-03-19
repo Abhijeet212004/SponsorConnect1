@@ -23,8 +23,8 @@ console.log('Base URL:', CASHFREE_BASE_URL);
 
 // Debug Razorpay credentials
 console.log('Initializing Razorpay with:');
-console.log('KEY_ID:', process.env.RAZORPAY_KEY_ID);
-console.log('KEY_SECRET:', process.env.RAZORPAY_KEY_SECRET ? '***' : 'undefined');
+console.log('KEY_ID:', 'rzp_test_0ZIbt0Lq015usg');
+console.log('KEY_SECRET:', 'ZaIEImmBlRZ9kggXpR8i4l3K');
 
 // Initialize Razorpay with your new credentials
 const razorpay = new Razorpay({
@@ -320,32 +320,21 @@ router.post('/process', isAuthenticated, paymentLimiter, async (req, res) => {
         sponsor.totalAmountSent += amount;
         await sponsor.save();
 
-        // Create confirmation notification
-        const confirmationNotification = new Notification({
-            type: 'message',
-            user: notification.from._id,
-            from: notification.to._id,
-            to: notification.from._id,
-            listingId: notification.listingId._id,
-            content: `Payment of ₹${amount} completed via ${paymentMethod.toUpperCase()}. Transaction ID: ${transactionId}`,
-            status: 'accepted',
-            paymentStatus: 'completed',
-            paymentAmount: amount,
-            paymentMethod: paymentMethod,
-            transactionId: transactionId,
-            paymentDate: verificationResult.timestamp,
-            paymentDetails: {
-                orderId: transactionId,
-                amount: amount,
-                status: 'completed',
-                completedAt: verificationResult.timestamp,
-                paymentId: transactionId,
-                method: paymentMethod
-            }
+        // Update user transactions
+        await User.findByIdAndUpdate(notification.from._id, {
+            $push: { transactions: recipientTransaction },
+            $inc: { totalAmountReceived: notification.listingId.amount }
         });
-        await confirmationNotification.save();
 
-        // Send real-time notification
+        await User.findByIdAndUpdate(notification.to._id, {
+            $push: { transactions: sponsorTransaction },
+            $inc: { totalAmountSent: notification.listingId.amount }
+        });
+
+        // Do not create a confirmation notification in the notification center
+        // This keeps the notification center clean
+
+        // Send real-time notification if socket.io is available
         if (global.io) {
             const notificationData = {
                 notificationId,
@@ -497,7 +486,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
                 from: sponsorId,
                 to: seekerId,
                 listingId: notification.listingId,
-                content: `Payment of $${paymentIntent.amount / 100} received for listing: ${notification.listingId.title}`,
+                content: `Payment of ₹${paymentIntent.amount / 100} received for listing: ${notification.listingId.title}`,
                 status: 'accepted',
                 paymentStatus: 'paid',
                 paymentAmount: paymentIntent.amount / 100
@@ -766,6 +755,7 @@ router.post('/create-razorpay-order', isAuthenticated, async (req, res) => {
 
         // Validate inputs
         if (!notificationId || !amount) {
+            console.error('Missing required parameters:', { notificationId, amount });
             return res.status(400).json({
                 success: false,
                 message: 'Missing required parameters'
@@ -779,9 +769,22 @@ router.post('/create-razorpay-order', isAuthenticated, async (req, res) => {
             .populate('listingId');
 
         if (!notification) {
+            console.error('Notification not found:', notificationId);
             return res.status(404).json({
                 success: false,
                 message: 'Notification not found'
+            });
+        }
+
+        // Verify user is authorized to make this payment
+        if (notification.to._id.toString() !== req.user._id.toString()) {
+            console.error('Unauthorized payment attempt:', {
+                userId: req.user._id,
+                expectedUserId: notification.to._id
+            });
+            return res.status(403).json({
+                success: false,
+                message: 'Unauthorized to make this payment'
             });
         }
 
@@ -799,15 +802,34 @@ router.post('/create-razorpay-order', isAuthenticated, async (req, res) => {
             }
         };
 
-        console.log('Creating Razorpay order:', options);
+        console.log('Creating Razorpay order with options:', options);
 
-        const order = await razorpay.orders.create(options);
-
-        if (!order || !order.id) {
-            throw new Error('Failed to create Razorpay order');
+        let order;
+        try {
+            order = await razorpay.orders.create(options);
+            console.log('Razorpay order created:', order);
+        } catch (razorpayError) {
+            console.error('Razorpay API error:', {
+                error: razorpayError,
+                message: razorpayError.message,
+                stack: razorpayError.stack
+            });
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to create payment order with Razorpay',
+                error: razorpayError.message
+            });
         }
 
-        console.log('Razorpay order created successfully:', {
+        if (!order || !order.id) {
+            console.error('Invalid order response:', order);
+            return res.status(500).json({
+                success: false,
+                message: 'Invalid order response from Razorpay'
+            });
+        }
+
+        console.log('Order created successfully:', {
             orderId: order.id,
             amount: order.amount,
             currency: order.currency
@@ -822,28 +844,30 @@ router.post('/create-razorpay-order', isAuthenticated, async (req, res) => {
             gateway: 'razorpay',
             createdAt: new Date()
         };
+
+        // Save the notification
         await notification.save();
 
-        // Return order details
+        // Send success response with order details
         res.json({
             success: true,
             order: {
                 id: order.id,
-                amount: order.amount / 100,
+                amount: order.amount,
                 currency: order.currency,
                 key: 'rzp_test_0ZIbt0Lq015usg'
             }
         });
-
     } catch (error) {
-        console.error('Razorpay order creation error:', {
+        console.error('Payment order creation error:', {
+            error: error,
             message: error.message,
-            stack: error.stack,
-            details: error.error || error
+            stack: error.stack
         });
         res.status(500).json({
             success: false,
-            message: 'Error creating payment order. Please try again later.'
+            message: 'Error creating payment order. Please try again later.',
+            error: error.message
         });
     }
 });
@@ -858,6 +882,27 @@ router.post('/verify-razorpay', isAuthenticated, async (req, res) => {
             paymentId: razorpay_payment_id,
             signature: razorpay_signature
         });
+
+        if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+            console.error('Missing required verification parameters');
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required verification parameters'
+            });
+        }
+
+        // Find notification with this order ID
+        const notification = await Notification.findOne({
+            'paymentDetails.orderId': razorpay_order_id
+        });
+
+        if (!notification) {
+            console.error('Notification not found for order:', razorpay_order_id);
+            return res.status(400).json({
+                success: false,
+                message: 'Payment notification not found. Please try initiating the payment again.'
+            });
+        }
 
         // Verify signature
         const body = razorpay_order_id + '|' + razorpay_payment_id;
@@ -874,68 +919,38 @@ router.post('/verify-razorpay', isAuthenticated, async (req, res) => {
         const isAuthentic = expectedSignature === razorpay_signature;
 
         if (!isAuthentic) {
-            console.error('Signature verification failed');
+            console.error('Invalid payment signature');
             return res.status(400).json({
                 success: false,
                 message: 'Invalid payment signature'
             });
         }
 
-        // First try to find notification by order ID in paymentDetails
-        let notification = await Notification.findOne({
-            $or: [
-                { 'paymentDetails.orderId': razorpay_order_id },
-                { 'paymentDetails.receipt': { $exists: true } }
-            ]
-        }).populate('from').populate('to').populate('listingId');
+        // Update notification with payment details
+        notification.paymentStatus = 'completed';
+        notification.paymentDetails = {
+            ...notification.paymentDetails,
+            status: 'completed',
+            paymentId: razorpay_payment_id,
+            completedAt: new Date()
+        };
+        
+        await notification.save();
 
-        console.log('Initial notification search result:', notification ? notification._id : 'Not found');
-
-        // If not found, try to find the most recent pending notification for the user
-        if (!notification) {
-            notification = await Notification.findOne({
-                paymentStatus: 'pending',
-                type: { $in: ['connection_accepted', 'payment_request'] }
-            }).sort({ createdAt: -1 }).populate('from').populate('to').populate('listingId');
-
-            console.log('Fallback notification search result:', notification ? notification._id : 'Not found');
-        }
-
-        if (!notification) {
-            console.error('Order not found:', razorpay_order_id);
-            return res.status(404).json({
-                success: false,
-                message: 'Order not found'
-            });
-        }
-
-        // Get payment details from Razorpay
+        // Get payment details from Razorpay for transaction history
         const payment = await razorpay.payments.fetch(razorpay_payment_id);
         const amount = payment.amount / 100; // Convert from paise to rupees
         const timestamp = new Date();
 
-        console.log('Payment details:', {
-            amount,
-            method: payment.method,
-            status: payment.status
-        });
+        // Populate notification with user details
+        const populatedNotification = await Notification.findById(notification._id)
+            .populate('from', 'fullName email')
+            .populate('to', 'fullName email')
+            .populate('listingId', 'title');
 
-        // Update notification status
-        notification.paymentStatus = 'completed';
-        notification.paymentAmount = amount;
-        notification.paymentDate = timestamp;
-        notification.paymentMethod = payment.method;
-        notification.transactionId = razorpay_payment_id;
-        notification.paymentDetails = {
-            orderId: razorpay_order_id,
-            receipt: notification.paymentDetails?.receipt,
-            amount: amount,
-            status: 'completed',
-            completedAt: timestamp,
-            paymentId: razorpay_payment_id,
-            method: payment.method
-        };
-        await notification.save();
+        if (!populatedNotification) {
+            throw new Error('Failed to retrieve notification details');
+        }
 
         // Create transaction records for both users
         const recipientTransaction = {
@@ -944,10 +959,12 @@ router.post('/verify-razorpay', isAuthenticated, async (req, res) => {
             status: 'completed',
             date: timestamp,
             transactionId: razorpay_payment_id,
-            paymentMethod: payment.method,
-            counterparty: notification.to._id,
-            listingTitle: notification.listingId ? notification.listingId.title : 'Sponsorship Payment',
-            counterpartyName: notification.to.fullName
+            paymentMethod: payment.method || 'razorpay',
+            counterparty: populatedNotification.to._id,
+            listingTitle: populatedNotification.listingId ? populatedNotification.listingId.title : 'Sponsorship Payment',
+            counterpartyName: populatedNotification.to.fullName,
+            senderName: populatedNotification.to.fullName,
+            receiverName: populatedNotification.from.fullName
         };
 
         const sponsorTransaction = {
@@ -956,109 +973,60 @@ router.post('/verify-razorpay', isAuthenticated, async (req, res) => {
             status: 'completed',
             date: timestamp,
             transactionId: razorpay_payment_id,
-            paymentMethod: payment.method,
-            counterparty: notification.from._id,
-            listingTitle: notification.listingId ? notification.listingId.title : 'Sponsorship Payment',
-            counterpartyName: notification.from.fullName
+            paymentMethod: payment.method || 'razorpay',
+            counterparty: populatedNotification.from._id,
+            listingTitle: populatedNotification.listingId ? populatedNotification.listingId.title : 'Sponsorship Payment',
+            counterpartyName: populatedNotification.from.fullName,
+            senderName: populatedNotification.to.fullName,
+            receiverName: populatedNotification.from.fullName
         };
 
-        console.log('Updating user transactions');
+        // Update recipient's transactions
+        const updatedRecipient = await User.findByIdAndUpdate(
+            populatedNotification.from._id,
+            {
+                $push: { transactions: recipientTransaction },
+                $inc: { totalAmountReceived: amount }
+            },
+            { new: true }
+        );
 
-        // Initialize transactions array if it doesn't exist and update both users atomically
-        await Promise.all([
-            User.findByIdAndUpdate(
-                notification.from._id,
-                {
-                    $push: { transactions: recipientTransaction },
-                    $inc: { totalAmountReceived: amount },
-                    $setOnInsert: { transactions: [] }
-                },
-                { upsert: true, new: true }
-            ),
-            User.findByIdAndUpdate(
-                notification.to._id,
-                {
-                    $push: { transactions: sponsorTransaction },
-                    $inc: { totalAmountSent: amount },
-                    $setOnInsert: { transactions: [] }
-                },
-                { upsert: true, new: true }
-            )
-        ]);
+        // Update sponsor's transactions
+        const updatedSponsor = await User.findByIdAndUpdate(
+            populatedNotification.to._id,
+            {
+                $push: { transactions: sponsorTransaction },
+                $inc: { totalAmountSent: amount }
+            },
+            { new: true }
+        );
 
-        // Create confirmation notifications for both users
-        const confirmationNotifications = [
-            new Notification({
-                type: 'payment_confirmation',
-                from: notification.to._id,
-                to: notification.from._id,
-                listingId: notification.listingId._id,
-                content: `Payment of ₹${amount} received from ${notification.to.fullName}. Transaction ID: ${razorpay_payment_id}`,
-                status: 'completed',
-                paymentStatus: 'completed',
-                paymentAmount: amount,
-                paymentMethod: payment.method,
-                transactionId: razorpay_payment_id,
-                paymentDate: timestamp,
-                paymentDetails: {
-                    orderId: razorpay_order_id,
-                    amount: amount,
-                    status: 'completed',
-                    completedAt: timestamp,
-                    paymentId: razorpay_payment_id,
-                    method: payment.method
-                }
-            }),
-            new Notification({
-                type: 'payment_confirmation',
-                from: notification.from._id,
-                to: notification.to._id,
-                listingId: notification.listingId._id,
-                content: `Your payment of ₹${amount} to ${notification.from.fullName} was successful. Transaction ID: ${razorpay_payment_id}`,
-                status: 'completed',
-                paymentStatus: 'completed',
-                paymentAmount: amount,
-                paymentMethod: payment.method,
-                transactionId: razorpay_payment_id,
-                paymentDate: timestamp,
-                paymentDetails: {
-                    orderId: razorpay_order_id,
-                    amount: amount,
-                    status: 'completed',
-                    completedAt: timestamp,
-                    paymentId: razorpay_payment_id,
-                    method: payment.method
-                }
-            })
-        ];
-
-        await Notification.insertMany(confirmationNotifications);
-
-        // Send real-time notifications if socket.io is available
-        if (global.io) {
-            const notificationData = {
-                type: 'payment_confirmation',
-                amount,
-                transactionId: razorpay_payment_id,
-                paymentMethod: payment.method,
-                timestamp
-            };
-            global.io.to(notification.from._id.toString()).emit('paymentConfirmed', notificationData);
-            global.io.to(notification.to._id.toString()).emit('paymentConfirmed', notificationData);
-        }
-
-        res.json({
-            success: true,
-            message: 'Payment verified and recorded successfully',
-            transaction: {
-                id: razorpay_payment_id,
-                amount,
-                method: payment.method,
-                timestamp,
-                status: 'completed'
+        console.log('Transaction history updated for both users:', {
+            recipient: {
+                id: populatedNotification.from._id,
+                name: populatedNotification.from.fullName,
+                transactionCount: updatedRecipient.transactions?.length || 0
+            },
+            sponsor: {
+                id: populatedNotification.to._id,
+                name: populatedNotification.to.fullName,
+                transactionCount: updatedSponsor.transactions?.length || 0
             }
         });
 
+        // Do not create a confirmation notification
+        // This keeps the notification center clean
+
+        console.log('Payment verified and saved:', {
+            notificationId: notification._id,
+            orderId: razorpay_order_id,
+            paymentId: razorpay_payment_id
+        });
+
+        res.json({
+            success: true,
+            message: 'Payment verified successfully'
+        });
     } catch (error) {
         console.error('Payment verification error:', error);
         res.status(500).json({
@@ -1068,4 +1036,4 @@ router.post('/verify-razorpay', isAuthenticated, async (req, res) => {
     }
 });
 
-module.exports = router; 
+module.exports = router;

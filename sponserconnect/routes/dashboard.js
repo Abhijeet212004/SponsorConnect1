@@ -66,8 +66,30 @@ router.get('/', async (req, res) => {
             listingId: { $ne: null }
         })
         .populate('from', 'fullName email')
-        .populate('listingId', 'title amount')
+        .populate({
+            path: 'listingId',
+            select: 'title amount user',
+            populate: { path: 'user', select: 'fullName' }
+        })
+        .populate({
+            path: 'creatorListingId',
+            select: 'title amount user',
+            populate: { path: 'user', select: 'fullName' }
+        })
         .sort('-createdAt');
+
+        // Log all payment-related notifications for debugging
+        console.log('Payment notifications found:', notifications.map(n => ({
+            id: n._id,
+            from: n.from ? n.from.fullName : 'Unknown',
+            to: n.to,
+            listingId: n.listingId ? n.listingId._id : null,
+            listingTitle: n.listingId ? n.listingId.title : null,
+            listingAmount: n.listingId ? n.listingId.amount : null,
+            listingOwner: n.listingId && n.listingId.user ? n.listingId.user.fullName : 'Unknown',
+            creatorListingId: n.creatorListingId ? n.creatorListingId._id : null,
+            creatorAmount: n.creatorAmount || 0
+        })));
 
         // Filter out notifications with invalid listingId
         const validNotifications = notifications.filter(notification => 

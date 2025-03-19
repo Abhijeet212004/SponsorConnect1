@@ -9,6 +9,8 @@ const MongoStore = require('connect-mongo');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const http = require('http');
+const socketIo = require('socket.io');
 const { isAuthenticated } = require('./middleware/auth');
 const notificationsRouter = require('./routes/notifications');
 const paymentsRouter = require('./routes/payments');
@@ -22,6 +24,28 @@ console.log('RAZORPAY_KEY_SECRET:', process.env.RAZORPAY_KEY_SECRET ? '***' : 'u
 console.log('NODE_ENV:', process.env.NODE_ENV);
 
 const app = express();
+
+// Create HTTP server
+const server = http.createServer(app);
+
+// Initialize socket.io
+const io = socketIo(server);
+global.io = io; // Make io globally available
+
+// Socket.io connection handling
+io.on('connection', (socket) => {
+    console.log('Client connected:', socket.id);
+
+    // Join user's room for notifications
+    socket.on('join', (userId) => {
+        socket.join(userId);
+        console.log(`User ${userId} joined their room`);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Client disconnected:', socket.id);
+    });
+});
 
 // Security middleware
 app.use(helmet({
@@ -137,6 +161,6 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 module.exports = app;

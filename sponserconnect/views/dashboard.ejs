@@ -94,7 +94,7 @@
             justify-content: center;
             width: 40px;
             height: 40px;
-            margin: 0;
+            height: 40px;
         }
 
         .notifications-btn:hover {
@@ -598,7 +598,6 @@
             align-items: center;
             gap: 10px;
             animation: slideIn 0.3s ease forwards;
-            max-width: 400px;
         }
 
         .notification.success {
@@ -664,7 +663,6 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            width: 100%;
         }
 
         .btn-primary:hover {
@@ -1036,7 +1034,7 @@
 
                             <div class="listing-footer">
                                 <div class="listing-amount">
-                                    $<%= listing.amount %>
+                                    ₹<%= listing.amount %>
                                 </div>
                                 <div class="listing-status <%= listing.status.toLowerCase() %>">
                                     <%= listing.status %>
@@ -1080,7 +1078,7 @@
                             <div class="card-body">
                                 <div class="amount-section">
                                     <span class="label">Amount:</span>
-                                    <span class="amount">$<%= listing.amount %></span>
+                                    <span class="amount">₹<%= listing.amount %></span>
                                 </div>
                                 <div class="description-section">
                                     <p><%= listing.description %></p>
@@ -1110,23 +1108,49 @@
                 <h2>Pending Payments</h2>
                 <div class="notifications-grid">
                     <% notifications.forEach(function(notification) { %>
-                        <% if (notification.from && notification.listingId) { %>
+                        <% if (notification.from && notification.listingId && notification.status === 'accepted' && notification.paymentStatus === 'pending') { %>
+                            <% console.log('Notification details:', JSON.stringify({
+                                from: notification.from.fullName,
+                                fromId: notification.from._id,
+                                to: notification.to,
+                                listingId: notification.listingId._id,
+                                listingTitle: notification.listingId.title,
+                                listingAmount: notification.listingId.amount,
+                                listingUser: notification.listingId.user ? notification.listingId.user.fullName : 'Unknown'
+                            }, null, 2)); %>
                             <div class="notification-card">
                                 <h3>Payment Required</h3>
-                                <p>Recipient: <%= notification.from.fullName || 'Unknown' %></p>
-                                <p>Amount: ₹<%= notification.listingId ? notification.listingId.amount || 0 : 0 %></p>
+                                <% if (notification.listingId && notification.listingId.user) { %>
+                                    <p>Listing Owner: <%= notification.listingId.user.fullName || 'Unknown' %></p>
+                                <% } %>
+                                <p>Recipient: <%= notification.from.fullName || 'Unknown' %> (Creator)</p>
+                                
+                                <% let amount = 0; %>
+                                <% if (notification.creatorAmount && notification.creatorAmount > 0) { %>
+                                    <% amount = notification.creatorAmount; %>
+                                <% } else if (notification.listingId && notification.listingId.amount) { %>
+                                    <% amount = notification.listingId.amount; %>
+                                <% } %>
+                                
+                                <p><strong>Amount Needed by Creator: ₹<%= amount %></strong></p>
+                                
+                                <% if (notification.from._id.toString() !== notification.listingId.user._id.toString()) { %>
+                                    <p class="warning-text" style="color: red;"><strong>Warning:</strong> The listing owner and payment recipient are different!</p>
+                                <% } %>
+                                
                                 <p>For: <%= notification.listingId ? notification.listingId.title || 'Untitled Listing' : 'Unknown Listing' %></p>
                                 <div class="payment-section">
-                                    <% if (notification.listingId && notification.listingId.amount > 0) { %>
-                                        <button onclick="initiatePayment('<%= notification._id %>', <%= notification.listingId.amount %>)" class="btn btn-primary">
-                                            <i class="fas fa-credit-card"></i> Pay Now
+                                    <% if ((notification.creatorAmount && notification.creatorAmount > 0) || (notification.listingId && notification.listingId.amount > 0)) { %>
+                                        <% const paymentAmount = notification.creatorAmount > 0 ? notification.creatorAmount : notification.listingId.amount; %>
+                                        <button onclick="initiatePayment('<%= notification._id %>', <%= paymentAmount %>)" class="btn btn-primary">
+                                            <i class="fas fa-credit-card"></i> Complete Payment
                                         </button>
                                     <% } else { %>
                                         <button class="btn btn-primary" disabled>
                                             Invalid Amount
                                         </button>
                                     <% } %>
-        </div>
+                                </div>
                             </div>
                         <% } %>
                     <% }); %>
@@ -1582,7 +1606,12 @@
 
                     const listingTitle = (listingDetails.title || 'Untitled Listing').replace(/'/g, "\\'");
                     const notificationId = notification._id;
-                    const amount = listingDetails.amount || 0;
+                    let amount = 0;
+                    if (notification.creatorAmount && notification.creatorAmount > 0) {
+                        amount = notification.creatorAmount;
+                    } else if (listingDetails && listingDetails.amount) {
+                        amount = listingDetails.amount;
+                    }
 
                     return `
                         <div class="notification-item ${notification.read ? '' : 'unread'}" 
@@ -1598,10 +1627,10 @@
                                 ${notification.message ? `<p class="notification-message">${notification.message}</p>` : ''}
                                 ${showPayButton ? `
                                     <div class="payment-info">
-                                        <p class="amount">Amount: ₹${amount}</p>
+                                        <p class="amount">Amount Needed by Creator: ₹${amount}</p>
                                         <button onclick="initiatePayment('${notificationId}', ${amount}, '${fromUser.fullName || 'Unknown User'}')" 
                                                 class="btn btn-primary">
-                                            <i class="fas fa-credit-card"></i> Pay Now
+                                            <i class="fas fa-credit-card"></i> Complete Payment
                                         </button>
                                     </div>
                                 ` : ''}
@@ -1618,7 +1647,7 @@
                             ` : ''}
                             ${showGmailButton && emailToUse ? `
                                 <div class="notification-actions">
-                                    <button onclick="sendGmailEmail(\`${emailToUse}\`, \`${listingTitle}\`, \`${notificationId}\`)" class="btn btn-primary">
+                                    <button onclick="sendGmailEmail(\`${emailToUse}\`, \`${listingTitle}\`, \`${notificationId}\`); return false;" class="btn btn-primary">
                                         <i class="fas fa-envelope"></i> Send Gmail
                                     </button>
                                 </div>
@@ -1679,34 +1708,24 @@
                 if (result.success) {
                     if (action === 'accepted') {
                         showNotification('Connection request accepted successfully!', 'success');
+                        // Fetch updated notifications with populated data
+                        const notificationsResponse = await fetch('/dashboard');
+                        const html = await notificationsResponse.text();
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
                         
-                        // Get the notification element to extract email and listing info
-                        const notificationElement = document.querySelector(`[data-id="${notificationId}"]`);
-                        const email = notificationElement.getAttribute('data-email');
-                        const listingTitle = notificationElement.getAttribute('data-listing-title');
-                        
-                        // Show email confirmation dialog
-                        const emailConfirmation = document.createElement('div');
-                        emailConfirmation.className = 'email-confirmation-dialog';
-                        emailConfirmation.innerHTML = `
-                            <div class="email-confirmation-content">
-                                <h3>Connection Request Accepted!</h3>
-                                <p>Would you like to send them an email now?</p>
-                                <div class="email-confirmation-buttons">
-                                    <button onclick="sendGmailEmail('${email}', '${listingTitle}', '${notificationId}')" class="btn btn-primary">
-                                        <i class="fas fa-envelope"></i> Send Email
-                                    </button>
-                                    <button onclick="closeEmailConfirmation()" class="btn btn-secondary">
-                                        Later
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                        document.body.appendChild(emailConfirmation);
+                        // Get the updated pending payments section
+                        const updatedSection = doc.querySelector('.pending-payments-section');
+                        if (updatedSection) {
+                            const currentSection = document.querySelector('.pending-payments-section');
+                            if (currentSection) {
+                                currentSection.innerHTML = updatedSection.innerHTML;
+                            }
+                        }
                     } else {
                         showNotification('Connection request rejected', 'success');
                     }
-                    fetchNotifications(); // Refresh notifications
+                    fetchNotifications(); // Refresh notifications panel
                 } else {
                     throw new Error(result.message);
                 }
@@ -1715,43 +1734,6 @@
                 showNotification(error.message || 'Error responding to request', 'error');
             }
         }
-
-        // Function to close email confirmation dialog
-        function closeEmailConfirmation() {
-            const dialog = document.querySelector('.email-confirmation-dialog');
-            if (dialog) {
-                dialog.style.animation = 'fadeOut 0.3s ease';
-                setTimeout(() => {
-                    dialog.remove();
-                }, 300);
-            }
-        }
-
-        // Updated Gmail sending function
-        function sendGmailEmail(toEmail, listingTitle, notificationId) {
-            try {
-                console.log('sendGmailEmail called with:', { toEmail, listingTitle, notificationId });
-                
-                if (!toEmail || !listingTitle || !notificationId) {
-                    console.error('Missing parameters:', { toEmail, listingTitle, notificationId });
-                    showNotification('Missing required information for email', 'error');
-                    return;
-                }
-
-                const url = `/auth/gmail?to=${encodeURIComponent(toEmail)}&subject=${encodeURIComponent(`Re: ${listingTitle}`)}&notificationId=${encodeURIComponent(notificationId)}`;
-                console.log('Redirecting to:', url);
-                window.location.href = url;
-            } catch (error) {
-                console.error('Error in sendGmailEmail:', error);
-                showNotification('Error preparing email. Please try again.', 'error');
-            }
-        }
-
-        // Check for new notifications periodically
-        setInterval(fetchNotifications, 30000); // Every 30 seconds
-
-        // Initial fetch
-        document.addEventListener('DOMContentLoaded', fetchNotifications);
 
         // Chatbot functionality
         const chatMessages = document.getElementById('chatMessages');
@@ -1940,31 +1922,37 @@
                     })
                 });
 
-                const orderData = await orderResponse.json();
-
                 if (!orderResponse.ok) {
-                    throw new Error(orderData.message || 'Failed to create payment order');
+                    const errorData = await orderResponse.json();
+                    throw new Error(errorData.message || 'Failed to create payment order');
                 }
+
+                const orderData = await orderResponse.json();
+                console.log('Order created:', orderData);
 
                 if (!orderData.success || !orderData.order) {
                     throw new Error('Invalid order response from server');
                 }
 
-                console.log('Order created:', orderData.order);
-
                 // Initialize Razorpay payment
                 const options = {
                     key: orderData.order.key,
-                    amount: orderData.order.amount, // Amount is already in paise
+                    amount: orderData.order.amount,
                     currency: orderData.order.currency,
                     name: 'SponserConnect',
                     description: 'Payment for sponsorship',
                     order_id: orderData.order.id,
+                    prefill: {
+                        name: user.fullName,
+                        email: user.email
+                    },
+                    theme: {
+                        color: '#FFD700'
+                    },
                     handler: async function (response) {
                         try {
                             console.log('Payment successful, verifying...', response);
 
-                            // Verify payment
                             const verifyResponse = await fetch('/payments/verify-razorpay', {
                                 method: 'POST',
                                 headers: {
@@ -1977,12 +1965,11 @@
                                 })
                             });
 
-                            if (!verifyResponse.ok) {
-                                const errorData = await verifyResponse.json();
-                                throw new Error(errorData.message || 'Payment verification failed');
-                            }
-
                             const verifyData = await verifyResponse.json();
+
+                            if (!verifyResponse.ok) {
+                                throw new Error(verifyData.message || 'Payment verification failed');
+                            }
 
                             if (verifyData.success) {
                                 showToast('success', 'Payment successful!');
@@ -1994,23 +1981,16 @@
                             console.error('Payment verification error:', error);
                             showToast('error', error.message || 'Error verifying payment');
                         }
-                    },
-                    prefill: {
-                        name: '<%= user.fullName %>',
-                        email: '<%= user.email %>',
-                        contact: '<%= user.phone || "" %>'
-                    },
-                    theme: {
-                        color: '#FFD700'
                     }
                 };
 
+                console.log('Initializing Razorpay with options:', options);
                 const razorpayInstance = new Razorpay(options);
                 razorpayInstance.open();
 
             } catch (error) {
                 console.error('Payment error:', error);
-                showToast('error', error.message || 'Error initiating payment');
+                showToast('error', error.message || 'Error processing payment');
             }
         }
 
@@ -2033,7 +2013,40 @@
                 }
             }, 5000);
         }
+
+        // Add Gmail sending functionality
+        function sendGmailEmail(toEmail, listingTitle, notificationId) {
+            console.log('Sending Gmail to:', toEmail, 'for listing:', listingTitle);
+            
+            // Prepare the email content
+            const subject = `Re: ${listingTitle}`;
+            const body = `Thank you for connecting with me on SponsorConnect!
+
+I received your connection request and would like to discuss further.
+
+Best regards,
+<%= user.fullName %>
+
+--
+Sent via SponsorConnect`;
+
+            // Track the notification ID for deletion if needed
+            localStorage.setItem('lastEmailNotificationId', notificationId);
+            
+            // Open Gmail compose window directly
+            const gmailUrl = `https://mail.google.com/mail/u/0/?fs=1&tf=cm&source=mailto&to=${encodeURIComponent(toEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            
+            // Show modal with instructions
+            const confirmMessage = `We'll open Gmail in a new tab with a pre-filled email to ${toEmail}.\n\nIf you're not logged in to Gmail, you'll need to log in first.\n\nAfter sending the email, close the tab to return to SponsorConnect.`;
+            
+            if (confirm(confirmMessage)) {
+                // Open in a new tab
+                window.open(gmailUrl, '_blank');
+            }
+            
+            // No need to go through the server route
+            return false;
+        }
     </script>
 </body>
 </html>
-

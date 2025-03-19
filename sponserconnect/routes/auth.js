@@ -390,8 +390,21 @@ router.get('/gmail/callback', isAuthenticated, async (req, res) => {
             }
         }
 
-        // Create Gmail compose URL
-        const composeUrl = `https://mail.google.com/mail/u/0/?view=cm&fs=1&to=${encodeURIComponent(emailData.to)}&su=${encodeURIComponent(emailData.subject)}&body=${encodeURIComponent(`Thank you for connecting with me on SponsorConnect!\n\nI received your connection request and would like to discuss further.\n\nBest regards,\n${req.user.fullName}\n\n--\nSent via SponsorConnect`)}&tf=1&close=1&su=1`;
+        // Create mail content
+        const emailBody = `Thank you for connecting with me on SponsorConnect!
+
+I received your connection request and would like to discuss further.
+
+Best regards,
+${req.user.fullName}
+
+--
+Sent via SponsorConnect`;
+
+        // Use dedicated Gmail draft creation URL - takes you directly to compose window
+        const gmailUrl = `https://mail.google.com/mail?extsrc=mailto&url=${encodeURIComponent(`mailto:${emailData.to}?subject=${emailData.subject}&body=${emailBody}`)}`;
+        
+        console.log('Generated Gmail URL:', gmailUrl);
 
         // Clear email data from session
         delete req.session.emailData;
@@ -400,7 +413,7 @@ router.get('/gmail/callback', isAuthenticated, async (req, res) => {
         req.flash('success', 'Email window opened. After sending, you will be redirected back to dashboard.');
         
         // Redirect to Gmail compose window
-        res.redirect(composeUrl);
+        res.redirect(gmailUrl);
     } catch (error) {
         console.error('Gmail OAuth error:', error);
         
