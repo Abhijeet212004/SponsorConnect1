@@ -4,8 +4,9 @@
     "description": "SponsorConnect - Premium Sponsorship Platform",
     "main": "app.js",
     "scripts": {
-        "start": "node app.js",
-        "dev": "nodemon app.js"
+        "start": "NODE_ENV=production node app.js",
+        "dev": "nodemon app.js",
+        "start:dev": "NODE_ENV=development node app.js"
     },
     "engines": {
         "node": ">=16.x"

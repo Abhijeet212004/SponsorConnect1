@@ -1,0 +1,43 @@
+# MongoDB Atlas Configuration for Render
+
+When setting up your web service on Render, add the following environment variables:
+
+1. Key: MONGODB_URI
+   Value: mongodb+srv://abhijeetbhosale540:abhijeet@cluster0.vfd1a.mongodb.net/sponsorconnect?retryWrites=true&w=majority&appName=Cluster0
+
+2. Key: SESSION_SECRET
+   Value: sponsorconnect_secure_session_9876543210
+
+3. Key: NODE_ENV
+   Value: production
+
+4. Key: PORT
+   Value: 3000
+
+5. Key: GMAIL_CLIENT_ID
+   Value: 1097884012299-quj13hfaahto4c45jp3c8hg1otamo0km.apps.googleusercontent.com
+
+6. Key: GMAIL_CLIENT_SECRET
+   Value: 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
+
+7. Key: GMAIL_REDIRECT_URI
+   Value: https://your-render-app-name.onrender.com/auth/gmail/callback
+   (Replace "your-render-app-name" with your actual Render URL after deployment)
+
+8. Key: RAZORPAY_KEY_ID
+   Value: rzp_test_7HFLqR6g44B9yK
+
+9. Key: RAZORPAY_KEY_SECRET
+   Value: DQhy4YJkXwJ6EXyMbmXPiN2R
+
+10. Key: CASHFREE_API_KEY
+    Value: TEST3366026537e56754b03f37299731687
+
+11. Key: CASHFREE_SECRET_KEY
+    Value: TESTe49f7b51c4ecfa4c156a72e9cc961a5d5b8ac6c8
+
+12. Key: APP_URL
+    Value: https://your-render-app-name.onrender.com
+    (Replace "your-render-app-name" with your actual Render URL after deployment)
+
+Make sure to update GMAIL_REDIRECT_URI and APP_URL with your actual Render URL after your service is deployed.
