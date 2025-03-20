@@ -22,6 +22,9 @@ console.log('NODE_ENV:', process.env.NODE_ENV);
 
 const app = express();
 
+// Trust proxy for Render deployment
+app.set('trust proxy', 1);
+
 // Create HTTP server
 const server = http.createServer(app);
 
