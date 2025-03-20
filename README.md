@@ -134,6 +134,25 @@ sponsorconnect/
 - `GET /dashboard/listings` - View all listings
 - `POST /dashboard/sponsor` - Create sponsorship
 
+## Deployment
+
+### MongoDB Atlas (Free Tier)
+1. Create a free account at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Set up a new cluster (select the FREE tier)
+3. Create a database user with a password
+4. Get your connection string and update your .env file
+
+### Render (Free Tier)
+1. Create a free account at [Render](https://render.com/)
+2. Connect your GitHub repository
+3. Create a new Web Service with the following settings:
+   - Build Command: `npm install`
+   - Start Command: `node app.js`
+4. Add environment variables from your .env file
+5. Deploy!
+
+No credit card required for either service!
+
 ## Contributing
 
 1. Fork the repository

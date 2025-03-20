@@ -4,7 +4,6 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const passport = require('passport');
 const flash = require('connect-flash');
-const dotenv = require('dotenv');
 const MongoStore = require('connect-mongo');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -14,8 +13,6 @@ const socketIo = require('socket.io');
 const { isAuthenticated } = require('./middleware/auth');
 const notificationsRouter = require('./routes/notifications');
 const paymentsRouter = require('./routes/payments');
-
-dotenv.config();
 
 // Debug environment variables
 console.log('Environment Variables:');
@@ -63,7 +60,8 @@ app.use('/auth/', limiter);
 console.log('Attempting to connect to MongoDB at:', process.env.MONGODB_URI);
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/sponsorconnect', {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000 // Timeout after 5s instead of 30s
 })
     .then(async () => {
         console.log('Connected to MongoDB');
@@ -77,7 +75,11 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/sponsorco
     })
     .catch(err => {
         console.error('MongoDB connection error:', err);
-        process.exit(1);
+        console.log('Please check your MongoDB URI in .env file and make sure MongoDB is running');
+        // Don't exit in production, allow retrying
+        if (process.env.NODE_ENV !== 'production') {
+            process.exit(1);
+        }
     });
 
 // MongoDB event handlers
